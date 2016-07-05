@@ -56,6 +56,10 @@ app.use(function(err, req, res, next) {
   });
 });
 
+console.log("migrate me");
+// added for migration purposes
+var migrate = require('./migrate.js');
+migrate.up();
 
 
 module.exports = app;
