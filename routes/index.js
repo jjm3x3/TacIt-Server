@@ -1,6 +1,9 @@
 var express = require('express');
 var router = express.Router();
 
+var pgp = require('pg-promise')();
+var db = pgp('postgress://tacIt:@localhost:5432/tacItDb');
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -9,16 +12,31 @@ router.get('/', function(req, res, next) {
 router.post('/item', function(req, res) {
     console.log(req.body);
 
-    var pgp = require('pg-promise')();
-    var db = pgp('postgress://tacIt:@localhost:5432/tacItDb');
 
     db.none('insert into items (thing) values(\'' + req.body.text + '\');');
 
-    res.send("thing recived");
+    res.redirect(301, 'http://localhost:3000/item');
+});
+
+router.get('/item/new', function(req, res) {
+    res.send('<p> Enter a note <p>' +
+             '<form method=POST action=/item>' + 
+             '<p><textarea name=text rows="10" cols="80"></textarea> </p>' +
+             '<p><input type=submit value=\"TacIt\"></p>' + 
+             '</form>');
 });
 
 router.get('/item', function(req, res) {
-    res.send("here is a thing");
+    var result = '<ul>';
+    db.any('select * from items;').then(function(results) {
+        for ( i = 0; i < results.length; ++i){
+            result += "<li>" + results[i].thing + "</li><br>";
+        }
+        result += "</ul>";
+        result += "<a href=\"http://localhost:3000/item/new\">New Note</a>"
+        console.log(result);
+        res.send(result);
+    });
 });
 
 module.exports = router;
