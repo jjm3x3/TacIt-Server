@@ -13,7 +13,10 @@ router.post('/item', function(req, res) {
     console.log(req.body);
 
 
-    db.none('insert into items (thing) values(\'' + req.body.text + '\');');
+    db.none('insert into items (thing) values($1);', [req.body.text])
+        .catch( function(error) {
+        console.log(error);
+    });
 
     res.redirect(301, 'http://localhost:3000/item');
 });
