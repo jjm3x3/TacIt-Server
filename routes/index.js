@@ -27,16 +27,25 @@ router.get('/item/new', function(req, res) {
 });
 
 router.get('/item', function(req, res) {
-    var result = '<ul>';
     db.any('select * from items;').then(function(results) {
-        for ( i = 0; i < results.length; ++i){
-            result += "<li>" + results[i].thing + "</li><br>";
-        }
-        result += "</ul>";
-        result += "<a href=\"http://localhost:3000/item/new\">New Note</a>"
-        console.log(result);
-        res.send(result);
+        res.setHeader('Content-Type', 'application/json');
+        json = JSON.stringify(results);
+        res.send('{\"items\":' + json + '}');
     });
+
+
+
+    // for web (HTML)
+    // var result = '<ul>';
+    // db.any('select * from items;').then(function(results) {
+    //     for ( i = 0; i < results.length; ++i){
+    //         result += "<li>" + results[i].thing + "</li><br>";
+    //     }
+    //     result += "</ul>";
+    //     result += "<a href=\"http://localhost:3000/item/new\">New Note</a>"
+    //     console.log(result);
+    //     res.send(result);
+    // });
 });
 
 module.exports = router;
