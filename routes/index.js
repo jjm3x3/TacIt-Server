@@ -21,6 +21,15 @@ router.post('/item', function(req, res) {
     res.redirect(301, 'http://localhost:3000/item');
 });
 
+router.put('/item/:id', function(req, res) {
+    console.log(req.body);
+
+    db.none('update items set thing = $2 where id = $1;', [req.body.id, req.body.thing]);
+
+    redirect(301, 'http://localhost:3000/item');
+
+});
+
 router.get('/item/new', function(req, res) {
     res.send('<p> Enter a note <p>' +
              '<form method=POST action=/item>' + 
