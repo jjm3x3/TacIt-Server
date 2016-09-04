@@ -1,16 +1,23 @@
 var pgp = require('pg-promise')();
-var db = pgp('postgress://tacIt:@localhost:5432/tacItDb');
+var db = pgp('postgress://tacIt:secret@localhost:5432/tacItDb');
 
 exports.up = function(){
     createTable("items", '(id serial, thing text)');
+    console.log("migration ran");
     // makeNotNull("items", "id");
     // makeSerial("items", "id");
 
 }
 
 function createTable(name,values){
-    db.none('create table ' + name +
-            ' ' + values + ';');
+    result = db.none('create table ' + name +
+            ' ' + values + ';')
+                .then(function(){
+			console.log("it worked")
+                 }).catch(function(error){
+			console.log(error);
+});
+    console.log(result)
 }
 
 function makeNotNull(tableName, coulmnName) {

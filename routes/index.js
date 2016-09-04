@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var pgp = require('pg-promise')();
-var db = pgp('postgress://tacIt:@localhost:5432/tacItDb');
+var db = pgp('postgress://tacIt:secret@localhost:5432/tacItDb');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
