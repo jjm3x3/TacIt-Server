@@ -1,13 +1,9 @@
 before_script:
-  - ls -la
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep version
 
 build:
   script:
-    - echo $GOPATH
-    - pwd
-    - ls /go
+    - mkdir -p /go/src/tacit-api
     - cp -R . /go/src
     - cd /go/src
     - dep ensure
