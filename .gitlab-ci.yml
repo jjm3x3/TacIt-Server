@@ -2,4 +2,5 @@ before_script:
   - ls -la
 
 build:
-  - go build
+  script:
+    - go build
