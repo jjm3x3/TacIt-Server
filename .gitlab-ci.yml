@@ -4,7 +4,8 @@ before_script:
 build:
   script:
     - mkdir -p /go/src/tacit-api
-    - cp -R . /go/src
+    - cp -R . /go/src/tacit-api
     - cd /go/src/tacit-api
+    - pwd
     - dep ensure
     - go build
