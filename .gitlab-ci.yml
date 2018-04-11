@@ -1,7 +1,7 @@
 before_script:
   - ls -la
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep --verison
+  - dep version
 
 build:
   script:
