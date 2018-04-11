@@ -5,6 +5,6 @@ build:
   script:
     - mkdir -p /go/src/tacit-api
     - cp -R . /go/src
-    - cd /go/src
+    - cd /go/src/tacit-api
     - dep ensure
     - go build
