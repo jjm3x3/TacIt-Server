@@ -1,0 +1,5 @@
+before_script:
+  - ls -la
+
+build:
+  - go build
