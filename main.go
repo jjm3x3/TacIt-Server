@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
