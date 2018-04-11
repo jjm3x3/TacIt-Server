@@ -7,5 +7,8 @@ build:
   script:
     - echo $GOPATH
     - pwd
+    - ls /go
+    - copy -R . /go/src
+    - cd /go/src
     - dep ensure
     - go build
