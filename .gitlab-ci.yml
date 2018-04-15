@@ -9,3 +9,7 @@ build:
     - pwd
     - dep ensure
     - go build
+    
+package:
+  script:
+    - docker ps
