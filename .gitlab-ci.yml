@@ -4,10 +4,10 @@ image:
 before_script:
   - mkdir -p /root/bin # should be addressed in https://gitlab.tacit-app.com/build/Go-Build/issues/1
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - docker login -u _json_key -p "$DOCKER_PASSWORD" https://us.gcr.io
 
 build:
   script:
+    - docker login -u _json_key -p "$DOCKER_PASSWORD" https://us.gcr.io
     - mkdir -p /root/src/tacit-api
     - cp -R . /root/src/tacit-api
     - cd /root/src/tacit-api
