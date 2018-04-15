@@ -1,3 +1,6 @@
+iamge:
+  - "base/archlinux"
+  
 before_script:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
