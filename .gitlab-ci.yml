@@ -1,4 +1,4 @@
-iamge:
+image:
   - "base/archlinux"
   
 before_script:
