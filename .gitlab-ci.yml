@@ -2,6 +2,7 @@ image:
   name: "us.gcr.io/tacit-196502/go-build:latest"
   
 before_script:
+  - mkdir -p /go/bin # should be addressed in https://gitlab.tacit-app.com/build/Go-Build/issues/1
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 build:
