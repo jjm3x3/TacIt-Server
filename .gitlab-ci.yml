@@ -1,5 +1,5 @@
 image:
-  name: "base/archlinux:latest"
+  name: "us.gcr.io/tacit-196502/myapi:0.0.2.2"
   
 before_script:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
