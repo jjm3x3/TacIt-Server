@@ -2,15 +2,14 @@ image:
   name: "us.gcr.io/tacit-196502/go-build:latest"
   
 before_script:
-  - mkdir -p /go/bin # should be addressed in https://gitlab.tacit-app.com/build/Go-Build/issues/1
+  - mkdir -p /root/bin # should be addressed in https://gitlab.tacit-app.com/build/Go-Build/issues/1
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 build:
   script:
-    - mkdir -p /go/src/tacit-api
-    - cp -R . /go/src/tacit-api
-    - cd /go/src/tacit-api
-    - pwd
+    - mkdir -p /root/src/tacit-api
+    - cp -R . /root/src/tacit-api
+    - cd /root/src/tacit-api
     - dep ensure
     - go build
     - docker build -t us.gcr.io/tacit-196502/myapi:0.0.3
