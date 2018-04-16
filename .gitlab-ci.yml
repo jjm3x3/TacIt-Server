@@ -11,6 +11,9 @@ build:
     - go build
     - docker build -t us.gcr.io/tacit-196502/myapi:0.0.3 .
     - docker push us.gcr.io/tacit-196502/myapi:0.0.3
+    
+deploy:
+  script:
     - export jkey=$(mktemp)
     - echo $jkey
     - echo "$DOCKER_PASSWORD" > $jkey
