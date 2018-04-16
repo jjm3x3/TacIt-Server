@@ -12,6 +12,7 @@ build:
     - docker build -t us.gcr.io/tacit-196502/myapi:0.0.3 .
     - docker push us.gcr.io/tacit-196502/myapi:0.0.3
     - export jkey = $(mktemp) 
+    - echo $(jkey)
     - echo "$DOCKER_PASSWORD" > $jkey
     - gcloud auth activate-service-account --key-file=$jkey
     - kubectl apply -f ./kube/deployment.yaml
@@ -20,3 +21,4 @@ build:
 #package:
 #  script:
 #    - docker ps
+ 
