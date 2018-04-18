@@ -41,14 +41,3 @@ spec:
         - name: cloudsql-instance-credentials
           secret: 
             secretName: cloudsql-instance-credentials
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: api-service
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 8080
-  selector:
-    app: api
