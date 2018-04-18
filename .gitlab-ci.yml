@@ -1,5 +1,5 @@
 image:
-  name: "us.gcr.io/tacit-196502/go-build:latest"
+  name: "us.gcr.io/tacit-196502/go-build:master"
 
 build:
   script:
@@ -12,7 +12,7 @@ build:
     - echo $CI_PROJECT_NAME
     - echo $CI_PROJECT_PATH_SLUG
     - docker build -t us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA .
-    - docker tag us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA us.gcr.io/tacit-196502/myapi:$CI_COMMIT_REF_NAME
+    - docker tag us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
     
