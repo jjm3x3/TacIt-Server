@@ -14,7 +14,7 @@ build:
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
     
-deploy:
+.deploy_template: &deploy_dev
   script:
     - export jkey=$(mktemp)
     - echo "$DOCKER_PASSWORD" > $jkey
@@ -23,6 +23,15 @@ deploy:
     - kubectl apply -f ./kube/deployment.yaml
     - rm $jkey
     
+deploy_feature: 
+    only:
+        - master
+        - develop
+        
+    <<: *deploy_dev
+
+    
+
 #package:
 #  script:
 #    - docker ps
