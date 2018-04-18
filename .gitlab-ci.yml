@@ -8,6 +8,7 @@ build:
     - cp -R . /root/src/tacit-api
     - cd /root/src/tacit-api
     - dep ensure
+    - CGO_ENABLED=0
     - go build
     - docker build -t us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA .
     - docker tag us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME

@@ -1,6 +1,6 @@
-FROM golang:1.10.0-stretch
+FROM alpine:latest
 LABEL maintainer="jjm3333@gmail.com"
 
-COPY tacit-api ./src/bin
+COPY tacit-api /bin/tacit-api
 
-CMD ["./bin/tacit-api"]
+CMD ["/bin/tacit-api"]
