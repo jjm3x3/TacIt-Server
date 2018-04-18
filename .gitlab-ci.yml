@@ -9,8 +9,6 @@ build:
     - cd /root/src/tacit-api
     - dep ensure
     - go build
-    - echo $CI_PROJECT_NAME
-    - echo $CI_PROJECT_PATH_SLUG
     - docker build -t us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA .
     - docker tag us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA
@@ -19,7 +17,6 @@ build:
 deploy:
   script:
     - export jkey=$(mktemp)
-    - echo $jkey
     - echo "$DOCKER_PASSWORD" > $jkey
     - gcloud auth activate-service-account --key-file=$jkey
     - gcloud container clusters get-credentials tacit-dev --zone us-central1-a --project tacit-196502
