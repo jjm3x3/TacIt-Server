@@ -24,12 +24,17 @@ build:
     - rm $jkey
     
 deploy_feature: 
+    <<: *deploy_dev
     only:
         - master
         - develop
         
+deploy_non-feature: 
     <<: *deploy_dev
-
+    when: manual
+    except: 
+        - master
+        - develop
     
 
 #package:
