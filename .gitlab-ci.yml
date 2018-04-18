@@ -9,13 +9,12 @@ build:
     - cd /root/src/tacit-api
     - dep ensure
     - go build
-    - echo $CI_PROJECT_ID
     - echo $CI_PROJECT_NAME
     - echo $CI_PROJECT_PATH_SLUG
-    - echo $CI_COMMIT_SHA
-    - echo $CI_COMMIT_REF_NAME
-    - docker build -t us.gcr.io/tacit-196502/myapi:0.0.3 .
-    - docker push us.gcr.io/tacit-196502/myapi:0.0.3
+    - docker build -t us.gcr.io/tacit-196502/myapi:$CI_COMMIT_SHA .
+    - docker tag us.gcr.io/tacit-196502/myapi:$CI_COMMIT_SHA us.gcr.io/tacit-196502/myapi:$CI_COMMIT_REF_NAME
+    - docker push us.gcr.io/tacit-196502/myapi:$CI_COMMIT_SHA
+    - docker push us.gcr.io/tacit-196502/myapi:$CI_COMMIT_REF_NAME
     
 deploy:
   script:
