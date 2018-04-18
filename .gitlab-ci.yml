@@ -25,14 +25,14 @@ build:
     
 deploy_feature: 
     <<: *deploy_dev
-    only:
-        - master
-        - develop
-        
-deploy_non-feature: 
-    <<: *deploy_dev
     when: manual
     except: 
+        - master
+        - develop
+
+deploy_develop_master: 
+    <<: *deploy_dev
+    only:
         - master
         - develop
     
