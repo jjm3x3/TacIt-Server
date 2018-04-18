@@ -1,5 +1,5 @@
 image:
-  name: "us.gcr.io/tacit-196502/go-build:latest"
+  name: "us.gcr.io/tacit-196502/go-build:master"
 
 build:
   script:
