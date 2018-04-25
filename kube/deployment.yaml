@@ -13,7 +13,7 @@ spec:
         app: api
     spec:
       containers:
-      - name: myapi
+      - name: api
         image: us.gcr.io/tacit-196502/api:{{TAG}}
         env:
           - name: DB_USER
