@@ -21,7 +21,8 @@ build:
     - echo "$DOCKER_PASSWORD" > $jkey
     - gcloud auth activate-service-account --key-file=$jkey
     - gcloud container clusters get-credentials tacit-dev --zone us-central1-a --project tacit-196502
-    - kubectl apply -f ./kube/deployment.yaml
+    - sed 's/{{TAG}}/1.2/g' kube/deployment.yaml > kube/finalDeployment.yaml
+    - kubectl apply -f ./kube/finalDeployment.yaml
     - rm $jkey
     
 deploy_feature: 
