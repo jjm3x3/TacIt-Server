@@ -45,6 +45,21 @@ func TestCreatePostHapyPath(t *testing.T) {
 
 }
 
+func TestCreatePostReadsBody(t *testing.T) {
+
+	//setup
+	c := &tacitContextMock{
+		jsonCode:         0,
+		timesJSONisCaled: 0,
+	}
+	db := &tacitDBMock{}
+
+	//execution
+	createPost(c, db)
+
+	//assertions
+
+}
 func TestCreatePostSavesPost(t *testing.T) {
 
 	//setup
