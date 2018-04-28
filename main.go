@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	db *gorm.DB
+// db *gorm.DB
 )
 
 type webUser struct {
@@ -40,10 +40,10 @@ func main() {
 		dbPassword = "@"
 	}
 
-	var err error
+	// var err error
 	connectionString := dbUser + ":" + dbPassword + "@tcp(127.0.0.1:3306)/" + defaultDb + "?charset=utf8&parseTime=True&loc=Local"
 	// connectionString := "host="+defaultHost+" port="+defaultPort+" user="+defaultUser+" dbname="+defaultDb+" sslmode=disable"
-	db, err = gorm.Open("mysql", connectionString) // TODO:: enable ssl
+	db, err := gorm.Open("mysql", connectionString) // TODO:: enable ssl
 	defer db.Close()
 
 	if err != nil {
@@ -51,7 +51,7 @@ func main() {
 		// TODO :: should exit right away
 	}
 
-	runMigration()
+	runMigration(db)
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -59,7 +59,11 @@ func main() {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
 
-	r.POST("/user", createUser)
+	doCreateUser := func(c *gin.Context) {
+		createUser(c, db)
+	}
+
+	r.POST("/user", doCreateUser)
 
 	r.POST("/login", login)
 
@@ -68,7 +72,7 @@ func main() {
 	r.Run()
 }
 
-func runMigration() {
+func runMigration(db *gorm.DB) {
 	// probably doesn't need to happen every time
 	db.AutoMigrate(&post{})
 	db.AutoMigrate(&dbUser{})
@@ -99,7 +103,7 @@ func login(c *gin.Context) {
 	}
 }
 
-func createUser(c *gin.Context) {
+func createUser(c *gin.Context, db *gorm.DB) {
 	var aUser webUser
 	err := c.BindJSON(&aUser)
 	if err != nil {
