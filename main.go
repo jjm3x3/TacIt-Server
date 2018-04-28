@@ -34,6 +34,14 @@ func (e *env) doCreateUser(c *gin.Context) {
 	createUser(c, e.db)
 }
 
+func (e *env) doLogin(c *gin.Context) {
+	login(c, e.db)
+}
+
+func (e *env) doCreatePost(c *gin.Context) {
+	createPost(c, e.db)
+}
+
 func main() {
 	fmt.Println("Hello, World")
 	// defaultHost := "localhost"
@@ -71,17 +79,11 @@ func main() {
 
 	r.POST("/user", anEnv.doCreateUser)
 
-	r.POST("/login", wrapWithDb(login, dbHandle))
+	r.POST("/login", anEnv.doLogin)
 
-	r.POST("/note", makePost)
+	r.POST("/note", anEnv.doCreatePost)
 
 	r.Run()
-}
-
-func wrapWithDb(handler func(*gin.Context, *gorm.DB), db *gorm.DB) func(*gin.Context) {
-	return func(c *gin.Context) {
-		handler(c, db)
-	}
 }
 
 func runMigration(db *gorm.DB) {
@@ -142,7 +144,7 @@ func createUser(c *gin.Context, db *gorm.DB) {
 	c.JSON(200, gin.H{"status": "success"})
 }
 
-func makePost(c *gin.Context) {
+func createPost(c *gin.Context, db *gorm.DB) {
 	var aPost post
 	err := c.BindJSON(&aPost)
 	if err != nil {
