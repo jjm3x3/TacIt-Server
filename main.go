@@ -65,11 +65,17 @@ func main() {
 
 	r.POST("/user", doCreateUser)
 
-	r.POST("/login", login)
+	r.POST("/login", wrapWithDB(login, db))
 
 	r.POST("/note", makePost)
 
 	r.Run()
+}
+
+func warpWithDb(handler func(*gin.Context, *gorm.DB), db *gorm.DB) func(*gin.Context) {
+	return func(c *gin.Context) {
+		handler(c, db)
+	}
 }
 
 func runMigration(db *gorm.DB) {
