@@ -56,11 +56,10 @@ func main() {
 		// TODO :: should exit right away
 	}
 
-	runMigration(dbHandle)
+	runMigration(&realTacitDB{gormDB: dbHandle})
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
-
 		c.JSON(200, gin.H{"message": "pong"})
 	})
 
@@ -75,8 +74,20 @@ func main() {
 	r.Run()
 }
 
-func runMigration(db *gorm.DB) {
+func runMigration(db tacitDB) {
 	// probably doesn't need to happen every time
-	db.AutoMigrate(&post{})
-	db.AutoMigrate(&dbUser{})
+	db.autoMigrate(&post{})
+	db.autoMigrate(&dbUser{})
+}
+
+type tacitDB interface {
+	autoMigrate(values ...interface{})
+}
+
+type realTacitDB struct {
+	gormDB *gorm.DB
+}
+
+func (db *realTacitDB) autoMigrate(values ...interface{}) {
+	db.gormDB.AutoMigrate(values)
 }
