@@ -13,23 +13,23 @@ type post struct {
 	Body  string `json:"body"`
 }
 
-func createPost(c *gin.Context, db *gorm.DB) {
+func createPost(c tacitContext, db tacitDB) {
 	var aPost post
-	err := c.BindJSON(&aPost)
+	err := c.bindJSON(&aPost)
 	if err != nil {
 		// fmt.Println("has headers: ", c.GetHeader("Content-Type"))
 		var body []byte
-		num, err := c.Request.Body.Read(body)
+		num, err := c.readBody(body)
 		if num <= 0 { // not sure if this is really an error
 			fmt.Println("There was no body provided")
 		} else if err != nil {
 			fmt.Println("There was an error reading the body: ", err)
 		}
 		fmt.Println("There was an error binding to aPost: ", body)
-		c.JSON(400, gin.H{"Error": "There was an error with what you provided"})
+		c.json(400, gin.H{"Error": "There was an error with what you provided"})
 		return
 	}
 	// fmt.Printf("Here is the result: '%v'\n", aPost)
-	db.Create(&aPost)
-	c.JSON(200, gin.H{"status": "success"})
+	db.create(&aPost)
+	c.json(200, gin.H{"status": "success"})
 }

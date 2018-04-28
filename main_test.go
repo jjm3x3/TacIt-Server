@@ -32,10 +32,14 @@ func TestRunMigration(t *testing.T) {
 }
 
 type tacitDBMock struct {
-	// autoMigrateCalled bool
 	timesAutoMigrateWasCalled int
+	timesCreateWasCalled      int
 }
 
 func (db *tacitDBMock) autoMigrate(values ...interface{}) {
 	db.timesAutoMigrateWasCalled++
+}
+
+func (db *tacitDBMock) create(value interface{}) {
+	db.timesCreateWasCalled++
 }

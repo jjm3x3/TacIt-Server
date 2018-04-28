@@ -16,7 +16,8 @@ type webUser struct {
 }
 
 type env struct {
-	db *gorm.DB
+	db    *gorm.DB
+	ourDB tacitDB
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
@@ -28,7 +29,30 @@ func (e *env) doLogin(c *gin.Context) {
 }
 
 func (e *env) doCreatePost(c *gin.Context) {
-	createPost(c, e.db)
+	ctx := &realTacitContext{ginCtx: c}
+	createPost(ctx, e.ourDB)
+}
+
+type tacitContext interface {
+	bindJSON(obj interface{}) error
+	readBody([]byte) (int, error)
+	json(int, map[string]interface{})
+}
+
+type realTacitContext struct {
+	ginCtx *gin.Context
+}
+
+func (ctx *realTacitContext) bindJSON(obj interface{}) error {
+	panic("method not implemented")
+}
+
+func (ctx *realTacitContext) readBody([]byte) (int, error) {
+	panic("method not implemented")
+}
+
+func (ctx *realTacitContext) json(int, map[string]interface{}) {
+	panic("method not implemented")
 }
 
 func main() {
@@ -78,16 +102,4 @@ func runMigration(db tacitDB) {
 	// probably doesn't need to happen every time
 	db.autoMigrate(&post{})
 	db.autoMigrate(&dbUser{})
-}
-
-type tacitDB interface {
-	autoMigrate(values ...interface{})
-}
-
-type realTacitDB struct {
-	gormDB *gorm.DB
-}
-
-func (db *realTacitDB) autoMigrate(values ...interface{}) {
-	db.gormDB.AutoMigrate(values)
 }
