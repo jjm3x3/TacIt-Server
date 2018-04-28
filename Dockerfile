@@ -1,8 +1,6 @@
-FROM golang:1.10.0-stretch
+FROM alpine:latest
 LABEL maintainer="jjm3333@gmail.com"
 
-COPY . ./src/TacIt/
-RUN cd src/TacIt/ && \
-    go install
+COPY tacit-api /bin/tacit-api
 
-CMD ["./bin/TacIt"]
+CMD ["/bin/tacit-api"]

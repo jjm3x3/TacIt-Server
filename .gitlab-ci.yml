@@ -1,5 +1,5 @@
 image:
-  name: "us.gcr.io/tacit-196502/go-build:latest"
+  name: "us.gcr.io/tacit-196502/go-build:master"
 
 build:
   script:
@@ -8,20 +8,36 @@ build:
     - cp -R . /root/src/tacit-api
     - cd /root/src/tacit-api
     - dep ensure
-    - go build
-    - docker build -t us.gcr.io/tacit-196502/myapi:0.0.3 .
-    - docker push us.gcr.io/tacit-196502/myapi:0.0.3
+    - CGO_ENABLED=0 go build
+    - docker build -t us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA .
+    - docker tag us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+    - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA
+    - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
     
-deploy:
+.deploy_template: &deploy_dev
   script:
     - export jkey=$(mktemp)
-    - echo $jkey
     - echo "$DOCKER_PASSWORD" > $jkey
     - gcloud auth activate-service-account --key-file=$jkey
     - gcloud container clusters get-credentials tacit-dev --zone us-central1-a --project tacit-196502
-    - kubectl apply -f ./kube/deployment.yaml
+    - sed "s/{{TAG}}/$CI_COMMIT_REF_NAME/g" kube/deployment.yaml > kube/finalDeployment.yaml
+    - kubectl apply -f ./kube/finalDeployment.yaml
     - rm $jkey
     
+deploy_feature: 
+    <<: *deploy_dev
+    when: manual
+    except: 
+        - master
+        - develop
+
+deploy_develop_master: 
+    <<: *deploy_dev
+    only:
+        - master
+        - develop
+    
+
 #package:
 #  script:
 #    - docker ps

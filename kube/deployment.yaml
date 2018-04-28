@@ -13,8 +13,8 @@ spec:
         app: api
     spec:
       containers:
-      - name: myapi
-        image: us.gcr.io/tacit-196502/myapi:0.0.2.2
+      - name: api
+        image: us.gcr.io/tacit-196502/api:{{TAG}}
         env:
           - name: DB_USER
             valueFrom:
@@ -41,14 +41,3 @@ spec:
         - name: cloudsql-instance-credentials
           secret: 
             secretName: cloudsql-instance-credentials
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: api-service
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 8080
-  selector:
-    app: api
