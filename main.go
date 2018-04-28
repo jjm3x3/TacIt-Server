@@ -26,6 +26,14 @@ type dbUser struct {
 	Password string
 }
 
+type env struct {
+	db *gorm.DB
+}
+
+func (e *env) doCreateUser(c *gin.Context) {
+	createUser(c, e.db)
+}
+
 func main() {
 	fmt.Println("Hello, World")
 	// defaultHost := "localhost"
@@ -43,15 +51,15 @@ func main() {
 	// var err error
 	connectionString := dbUser + ":" + dbPassword + "@tcp(127.0.0.1:3306)/" + defaultDb + "?charset=utf8&parseTime=True&loc=Local"
 	// connectionString := "host="+defaultHost+" port="+defaultPort+" user="+defaultUser+" dbname="+defaultDb+" sslmode=disable"
-	db, err := gorm.Open("mysql", connectionString) // TODO:: enable ssl
-	defer db.Close()
+	dbHandle, err := gorm.Open("mysql", connectionString) // TODO:: enable ssl
+	defer dbHandle.Close()
 
 	if err != nil {
 		fmt.Println("There was an error opeing the db: ", err)
 		// TODO :: should exit right away
 	}
 
-	runMigration(db)
+	runMigration(dbHandle)
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -59,20 +67,18 @@ func main() {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
 
-	doCreateUser := func(c *gin.Context) {
-		createUser(c, db)
-	}
+	anEnv := &env{db: dbHandle}
 
-	r.POST("/user", doCreateUser)
+	r.POST("/user", anEnv.doCreateUser)
 
-	r.POST("/login", wrapWithDB(login, db))
+	r.POST("/login", wrapWithDb(login, dbHandle))
 
 	r.POST("/note", makePost)
 
 	r.Run()
 }
 
-func warpWithDb(handler func(*gin.Context, *gorm.DB), db *gorm.DB) func(*gin.Context) {
+func wrapWithDb(handler func(*gin.Context, *gorm.DB), db *gorm.DB) func(*gin.Context) {
 	return func(c *gin.Context) {
 		handler(c, db)
 	}
@@ -84,7 +90,7 @@ func runMigration(db *gorm.DB) {
 	db.AutoMigrate(&dbUser{})
 }
 
-func login(c *gin.Context) {
+func login(c *gin.Context, db *gorm.DB) {
 	var login webUser
 	err := c.BindJSON(&login)
 	if err != nil {
