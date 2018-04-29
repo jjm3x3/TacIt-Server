@@ -11,6 +11,7 @@ type tacitDBMock struct {
 	timesCreateWasCalled      int
 	timesWhereWasCalled       int
 	timesFirstWasCalled       int
+	firstResultDBUser         *dbUser
 }
 
 func (db *tacitDBMock) autoMigrate(values ...interface{}) {
@@ -30,8 +31,8 @@ func (db *tacitDBMock) first(out interface{}, where ...interface{}) {
 	db.timesFirstWasCalled++
 	wout, k := out.(*dbUser)
 	if k {
-		wout.Username = "Username"
-		hashword, pearr := bcrypt.GenerateFromPassword([]byte("Password"), 10)
+		wout.Username = db.firstResultDBUser.Username
+		hashword, pearr := bcrypt.GenerateFromPassword([]byte(db.firstResultDBUser.Password), 10)
 		if pearr != nil {
 			fmt.Printf("Hashing error: %v\n", pearr)
 		} else {

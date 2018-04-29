@@ -5,12 +5,24 @@ import (
 )
 
 func TestLoginReadsBody(t *testing.T) {
-
-	c := &tacitContextMock{
-		bindJSONIsCalled: false,
+	aWebUser := &webUser{
+		Username: "Username",
+		Password: "Password",
 	}
 
-	db := &tacitDBMock{}
+	aDBUser := &dbUser{
+		Username: aWebUser.Username,
+		Password: aWebUser.Password,
+	}
+
+	c := &tacitContextMock{
+		bindJSONIsCalled:      false,
+		bindJSONResultWebUser: aWebUser,
+	}
+
+	db := &tacitDBMock{
+		firstResultDBUser: aDBUser,
+	}
 
 	login(c, db)
 
@@ -20,13 +32,25 @@ func TestLoginReadsBody(t *testing.T) {
 
 }
 func TestLoginHappyPath(t *testing.T) {
-
-	c := &tacitContextMock{
-		jsonCode:          0,
-		timesJSONisCalled: 0,
+	aWebUser := &webUser{
+		Username: "Username",
+		Password: "Password",
 	}
 
-	db := &tacitDBMock{}
+	aDBUser := &dbUser{
+		Username: aWebUser.Username,
+		Password: aWebUser.Password,
+	}
+
+	c := &tacitContextMock{
+		jsonCode:              0,
+		timesJSONisCalled:     0,
+		bindJSONResultWebUser: aWebUser,
+	}
+
+	db := &tacitDBMock{
+		firstResultDBUser: aDBUser,
+	}
 
 	login(c, db)
 
@@ -37,22 +61,84 @@ func TestLoginHappyPath(t *testing.T) {
 		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
 	}
 }
-func TestLoginSadPath(t *testing.T) {
 
+func TestLoginWrongUsernameRightPassword(t *testing.T) {
+
+	aWebUser := &webUser{
+		Username: "Usernam",
+		Password: "Password",
+	}
+
+	aDBUser := &dbUser{}
+
+	c := &tacitContextMock{
+		jsonCode:              0,
+		timesJSONisCalled:     0,
+		bindJSONResultWebUser: aWebUser,
+	}
+
+	db := &tacitDBMock{
+		firstResultDBUser: aDBUser,
+	}
+
+	login(c, db)
+	if c.jsonCode != 401 {
+		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.jsonCode)
+	}
+	if c.timesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	}
+}
+
+func TestLoginRightUsernameWrongPassword(t *testing.T) {
+
+	aWebUser := &webUser{
+		Username: "Username",
+		Password: "Passwor",
+	}
+
+	aDBUser := &dbUser{
+		Username: aWebUser.Username,
+		Password: aWebUser.Password + "d",
+	}
+
+	c := &tacitContextMock{
+		jsonCode:              0,
+		timesJSONisCalled:     0,
+		bindJSONResultWebUser: aWebUser,
+	}
+
+	db := &tacitDBMock{
+		firstResultDBUser: aDBUser,
+	}
+
+	login(c, db)
+	if c.jsonCode != 401 {
+		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.jsonCode)
+	}
+	if c.timesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	}
+}
+
+func TestLoginBindError(t *testing.T) {
 	c := &tacitContextMock{
 		jsonCode:          0,
 		timesJSONisCalled: 0,
 		bindJSONDoesError: true,
 	}
 
-	db := &tacitDBMock{}
+	aDBUser := &dbUser{}
+	db := &tacitDBMock{
+		firstResultDBUser: aDBUser,
+	}
 
 	login(c, db)
-
-	if c.jsonCode != 401 {
-		t.Errorf("The expected http status code is 403 for happy path. The current status code was %v", c.jsonCode)
+	if c.jsonCode != 400 {
+		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.jsonCode)
 	}
 	if c.timesJSONisCalled != 1 {
 		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
 	}
+
 }

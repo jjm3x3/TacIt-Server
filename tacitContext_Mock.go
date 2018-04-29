@@ -5,10 +5,11 @@ import (
 )
 
 type tacitContextMock struct {
-	bindJSONIsCalled  bool
-	jsonCode          int
-	timesJSONisCalled int
-	bindJSONDoesError bool
+	bindJSONIsCalled      bool
+	jsonCode              int
+	timesJSONisCalled     int
+	bindJSONDoesError     bool
+	bindJSONResultWebUser *webUser
 }
 
 func (ctx *tacitContextMock) bindJSON(obj interface{}) error {
@@ -16,11 +17,11 @@ func (ctx *tacitContextMock) bindJSON(obj interface{}) error {
 	if ctx.bindJSONDoesError {
 		return fmt.Errorf("error")
 	} else {
-		// obj = &webUser{Username: "Username", Password: "Password"}
 		wobj, k := obj.(*webUser)
 		if k {
-			wobj.Username = "Username"
-			wobj.Password = "Password"
+			// fmt.Printf("The user is %v and the password is %v\n", ctx.bindJSONResultWebUser.Username, ctx.bindJSONResultWebUser.Password)
+			wobj.Username = ctx.bindJSONResultWebUser.Username
+			wobj.Password = ctx.bindJSONResultWebUser.Password
 
 		}
 		return nil

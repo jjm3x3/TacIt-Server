@@ -19,6 +19,8 @@ func login(c tacitContext, db tacitDB) {
 	err := c.bindJSON(&login)
 	if err != nil {
 		fmt.Println("There was an error parsing login: ", err)
+		c.json(400, gin.H{"Error": "Invalid login body"})
+		return
 	}
 	fmt.Println("Here is the user info used to login: ", login)
 
