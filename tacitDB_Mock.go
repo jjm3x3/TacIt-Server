@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
+)
+
 type tacitDBMock struct {
 	timesAutoMigrateWasCalled int
 	timesCreateWasCalled      int
@@ -22,4 +28,14 @@ func (db *tacitDBMock) where(query interface{}, args ...interface{}) tacitDB {
 
 func (db *tacitDBMock) first(out interface{}, where ...interface{}) {
 	db.timesFirstWasCalled++
+	wout, k := out.(*dbUser)
+	if k {
+		wout.Username = "Username"
+		hashword, pearr := bcrypt.GenerateFromPassword([]byte("Password"), 10)
+		if pearr != nil {
+			fmt.Printf("Hashing error: %v\n", pearr)
+		} else {
+			wout.Password = string(hashword)
+		}
+	}
 }

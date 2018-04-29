@@ -16,6 +16,13 @@ func (ctx *tacitContextMock) bindJSON(obj interface{}) error {
 	if ctx.bindJSONDoesError {
 		return fmt.Errorf("error")
 	} else {
+		// obj = &webUser{Username: "Username", Password: "Password"}
+		wobj, k := obj.(*webUser)
+		if k {
+			wobj.Username = "Username"
+			wobj.Password = "Password"
+
+		}
 		return nil
 	}
 }

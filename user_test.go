@@ -2,7 +2,6 @@ package main
 
 import (
 	"testing"
-	// "fmt"
 )
 
 func TestLoginReadsBody(t *testing.T) {
