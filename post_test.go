@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"fmt"
 )
 
 func TestCreatePostReadsBody(t *testing.T) {
@@ -27,7 +28,7 @@ func TestCreatePostHapyPath(t *testing.T) {
 	//setup
 	c := &tacitContextMock{
 		jsonCode:         0,
-		timesJSONisCaled: 0,
+		timesJSONisCalled: 0,
 	}
 	db := &tacitDBMock{}
 
@@ -36,29 +37,37 @@ func TestCreatePostHapyPath(t *testing.T) {
 
 	//assertions
 	if c.jsonCode != 200 {
-		t.Error("The expected http status code is 200 for happy path")
+		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
 	}
 
-	if c.timesJSONisCaled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v time(s)", c.timesJSONisCaled)
+	if c.timesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
 	}
 
 }
 
-func TestCreatePostReadsBody(t *testing.T) {
+func TestCreatePostSadPath(t *testing.T) {
 
 	//setup
 	c := &tacitContextMock{
-		jsonCode:         0,
-		timesJSONisCaled: 0,
+		jsonCode: 	0,
+		timesJSONisCalled: 0,
+		bindJSONDoesError: true,
 	}
+
 	db := &tacitDBMock{}
 
 	//execution
 	createPost(c, db)
 
 	//assertions
-
+	if c.jsonCode != 400 {
+		t.Errorf("The expected http status code is 400 for sad path. The current status code is %v", c.jsonCode)
+	}
+	if c.timesJSONisCalled !=1 {
+		t.Errorf("json should be called on teh context exactly once but instead was called %v times", c.timesJSONisCalled)
+	}
+	
 }
 func TestCreatePostSavesPost(t *testing.T) {
 
@@ -79,19 +88,25 @@ func TestCreatePostSavesPost(t *testing.T) {
 type tacitContextMock struct {
 	bindJSONIsCalled bool
 	jsonCode         int
-	timesJSONisCaled int
+	timesJSONisCalled int
+	bindJSONDoesError	bool
 }
 
 func (ctx *tacitContextMock) bindJSON(obj interface{}) error {
 	ctx.bindJSONIsCalled = true
-	return nil
+	if ctx.bindJSONDoesError {
+		return fmt.Errorf("error")
+		} else {
+	return nil 	
+	}
 }
 
 func (ctx *tacitContextMock) readBody([]byte) (int, error) {
-	panic("method not implemented")
+	return 0, nil
+	// panic("method not implemented")
 }
 
 func (ctx *tacitContextMock) json(code int, obj map[string]interface{}) {
 	ctx.jsonCode = code
-	ctx.timesJSONisCaled++
+	ctx.timesJSONisCalled++
 }
