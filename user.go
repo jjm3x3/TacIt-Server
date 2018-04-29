@@ -14,16 +14,16 @@ type dbUser struct {
 	Password string
 }
 
-func login(c *gin.Context, db *gorm.DB) {
+func login(c tacitContext, db tacitDB) {
 	var login webUser
-	err := c.BindJSON(&login)
+	err := c.bindJSON(&login)
 	if err != nil {
 		fmt.Println("There was an error parsing login: ", err)
 	}
 	fmt.Println("Here is the user info used to login: ", login)
 
 	var theDbUser dbUser
-	db.Where("username = ?", login.Username).First(&theDbUser)
+	db.where("username = ?", login.Username).first(&theDbUser)
 
 	fmt.Println("Found this user from db: ", theDbUser)
 
@@ -32,10 +32,10 @@ func login(c *gin.Context, db *gorm.DB) {
 	if err != nil {
 		fmt.Println("There was something very wrong when logging in!")
 		fmt.Println("err: ", err)
-		c.JSON(403, gin.H{"Error": "either username or passowrd do not match"})
+		c.json(401, gin.H{"Error": "either username or password do not match"})
 	} else {
 		fmt.Println("Login successful")
-		c.JSON(200, gin.H{"status": "login successful"})
+		c.json(200, gin.H{"status": "login successful"})
 	}
 }
 

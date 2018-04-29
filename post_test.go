@@ -87,9 +87,9 @@ func TestCreatePostSavesPost(t *testing.T) {
 
 type tacitContextMock struct {
 	bindJSONIsCalled bool
-	jsonCode         int
+	jsonCode          int
 	timesJSONisCalled int
-	bindJSONDoesError	bool
+	bindJSONDoesError bool
 }
 
 func (ctx *tacitContextMock) bindJSON(obj interface{}) error {

@@ -25,7 +25,8 @@ func (e *env) doCreateUser(c *gin.Context) {
 }
 
 func (e *env) doLogin(c *gin.Context) {
-	login(c, e.db)
+	ctx := &realTacitContext{ginCtx: c}
+	login(ctx, e.ourDB)
 }
 
 func (e *env) doCreatePost(c *gin.Context) {

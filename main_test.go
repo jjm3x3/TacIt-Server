@@ -29,11 +29,14 @@ func TestRunMigration(t *testing.T) {
 	if db.timesAutoMigrateWasCalled != expectedTimes {
 		t.Errorf("autoMigrate was not called the expected number of times %v instead it was called %v times", expectedTimes, db.timesAutoMigrateWasCalled)
 	}
+
 }
 
 type tacitDBMock struct {
 	timesAutoMigrateWasCalled int
 	timesCreateWasCalled      int
+	timesWhereWasCalled       int
+	timesFirstWasCalled       int
 }
 
 func (db *tacitDBMock) autoMigrate(values ...interface{}) {
@@ -42,4 +45,13 @@ func (db *tacitDBMock) autoMigrate(values ...interface{}) {
 
 func (db *tacitDBMock) create(value interface{}) {
 	db.timesCreateWasCalled++
+}
+
+func (db *tacitDBMock) where(query interface{}, args ...interface{}) tacitDB {
+	db.timesWhereWasCalled++
+	return db
+}
+
+func (db *tacitDBMock) first(out interface{}, where ...interface{}) {
+	db.timesFirstWasCalled++
 }
