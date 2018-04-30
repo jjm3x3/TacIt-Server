@@ -6,6 +6,7 @@ testing:
     - mkdir -p /root/src/tacit-api
     - cp -R . /root/src/tacit-api
     - cd /root/src/tacit-api
+    - dep ensure
     - go test
     - echo $?
 
