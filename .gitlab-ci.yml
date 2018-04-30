@@ -1,7 +1,13 @@
 image:
   name: "us.gcr.io/tacit-196502/go-build:master"
+  
+stages: 
+  - testing
+  - build
+  - deploy
 
 testing:
+  stage: testing
   script:
     - mkdir -p /root/src/tacit-api
     - cp -R . /root/src/tacit-api
@@ -11,6 +17,7 @@ testing:
     - echo $?
 
 build:
+  stage: build
   script:
     - docker login -u _json_key -p "$DOCKER_PASSWORD" https://us.gcr.io
     - mkdir -p /root/src/tacit-api
@@ -25,6 +32,7 @@ build:
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$DOCKER_FRIENDLY_REF_NAME
     
 .deploy_template: &deploy_dev
+  stage: deploy
   script:
     - export jkey=$(mktemp)
     - echo "$DOCKER_PASSWORD" > $jkey
