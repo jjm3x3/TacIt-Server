@@ -46,6 +46,8 @@ func createUser(c tacitContext, db tacitDB) {
 	err := c.bindJSON(&aUser)
 	if err != nil {
 		fmt.Println("There was an error parsing User: ", err)
+		c.json(400, gin.H{"Error": "Invalid create user body"})
+		return
 	}
 	fmt.Println("Here is the user to create: ", aUser)
 
@@ -55,7 +57,7 @@ func createUser(c tacitContext, db tacitDB) {
 	pwHashBytes, err := bcrypt.GenerateFromPassword(pwBytes, 10)
 	if err != nil {
 		fmt.Println("There was and error: ", err)
-		c.json(500, gin.H{"Error": "There was and error with creating your password"})
+		c.json(500, gin.H{"Error": "There was an error with creating your password"})
 	}
 	theUser.Password = string(pwHashBytes)
 
@@ -64,6 +66,8 @@ func createUser(c tacitContext, db tacitDB) {
 	err = db.create(&theUser).error()
 	if err != nil {
 		fmt.Println("There was an issue creating user: ", err)
+		c.json(500, gin.H{"Error": "There was an error with creating your user"})
+		return
 	}
 	c.json(200, gin.H{"status": "success"})
 }

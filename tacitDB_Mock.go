@@ -7,11 +7,16 @@ import (
 )
 
 type tacitDBMock struct {
+	//Status Check
 	timesAutoMigrateWasCalled int
 	timesCreateWasCalled      int
 	timesWhereWasCalled       int
 	timesFirstWasCalled       int
-	firstResultDBUser         *dbUser
+	storedPassword            string
+
+	//Behavioral Setup
+	firstResultDBUser *dbUser
+	hasError          bool
 }
 
 func (db *tacitDBMock) autoMigrate(values ...interface{}) {
@@ -20,6 +25,11 @@ func (db *tacitDBMock) autoMigrate(values ...interface{}) {
 
 func (db *tacitDBMock) create(value interface{}) tacitDB {
 	db.timesCreateWasCalled++
+	cvalue, k := value.(*dbUser)
+	if k {
+		db.storedPassword = cvalue.Password
+	}
+
 	return db
 }
 
@@ -42,5 +52,8 @@ func (db *tacitDBMock) first(out interface{}, where ...interface{}) {
 	}
 }
 func (db *tacitDBMock) error() error {
+	if db.hasError {
+		return fmt.Errorf("___GENERIC_DATABASE_ERROR___")
+	}
 	return nil
 }
