@@ -19,7 +19,7 @@ build:
     - dep ensure
     - CGO_ENABLED=0 go build
     - docker build -t us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA .
-    - export DOCKER_FRIENDLY_REF_NAME=$(sed "s/\//_/g" $CI_COMMIT_REF_NAME)
+    - export DOCKER_FRIENDLY_REF_NAME=$(echo $CI_COMMIT_REF_NAME | sed "s/\//_/g")
     - docker tag us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$DOCKER_FRIENDLY_REF_NAME
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$DOCKER_FRIENDLY_REF_NAME
