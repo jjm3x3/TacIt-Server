@@ -41,9 +41,9 @@ func login(c tacitContext, db tacitDB) {
 	}
 }
 
-func createUser(c *gin.Context, db *gorm.DB) {
+func createUser(c tacitContext, db tacitDB) {
 	var aUser webUser
-	err := c.BindJSON(&aUser)
+	err := c.bindJSON(&aUser)
 	if err != nil {
 		fmt.Println("There was an error parsing User: ", err)
 	}
@@ -55,15 +55,15 @@ func createUser(c *gin.Context, db *gorm.DB) {
 	pwHashBytes, err := bcrypt.GenerateFromPassword(pwBytes, 10)
 	if err != nil {
 		fmt.Println("There was and error: ", err)
-		c.JSON(500, gin.H{"Error": "There was and error with creating your passowrd"})
+		c.json(500, gin.H{"Error": "There was and error with creating your password"})
 	}
 	theUser.Password = string(pwHashBytes)
 
 	fmt.Println("Here is the user That will be created: ", theUser)
 
-	err = db.Create(&theUser).Error
+	err = db.create(&theUser).error()
 	if err != nil {
 		fmt.Println("There was an issue creating user: ", err)
 	}
-	c.JSON(200, gin.H{"status": "success"})
+	c.json(200, gin.H{"status": "success"})
 }

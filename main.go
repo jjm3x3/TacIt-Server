@@ -16,12 +16,12 @@ type webUser struct {
 }
 
 type env struct {
-	db    *gorm.DB
 	ourDB tacitDB
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
-	createUser(c, e.db)
+	ctx := &realTacitContext{ginCtx: c}
+	createUser(ctx, e.ourDB)
 }
 
 func (e *env) doLogin(c *gin.Context) {
@@ -65,8 +65,8 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
-
-	anEnv := &env{db: dbHandle}
+	aTacitDB := &realTacitDB{gormDB: dbHandle}
+	anEnv := &env{ourDB: aTacitDB}
 
 	r.POST("/user", anEnv.doCreateUser)
 

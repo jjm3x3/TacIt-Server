@@ -18,8 +18,9 @@ func (db *tacitDBMock) autoMigrate(values ...interface{}) {
 	db.timesAutoMigrateWasCalled++
 }
 
-func (db *tacitDBMock) create(value interface{}) {
+func (db *tacitDBMock) create(value interface{}) tacitDB {
 	db.timesCreateWasCalled++
+	return db
 }
 
 func (db *tacitDBMock) where(query interface{}, args ...interface{}) tacitDB {
@@ -39,4 +40,7 @@ func (db *tacitDBMock) first(out interface{}, where ...interface{}) {
 			wout.Password = string(hashword)
 		}
 	}
+}
+func (db *tacitDBMock) error() error {
+	return nil
 }

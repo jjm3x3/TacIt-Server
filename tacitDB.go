@@ -4,9 +4,10 @@ import "github.com/jinzhu/gorm"
 
 type tacitDB interface {
 	autoMigrate(values ...interface{})
-	create(value interface{})
-	first(out interface{}, where ...interface{}) 
+	create(value interface{}) tacitDB
+	first(out interface{}, where ...interface{})
 	where(query interface{}, args ...interface{}) tacitDB
+	error() error
 }
 
 type realTacitDB struct {
@@ -17,11 +18,12 @@ func (db *realTacitDB) autoMigrate(values ...interface{}) {
 	db.gormDB.AutoMigrate(values)
 }
 
-func (db *realTacitDB) create(value interface{}) {
-	db.gormDB.Create(value)
+func (db *realTacitDB) create(value interface{}) tacitDB {
+	db.gormDB = db.gormDB.Create(value)
+	return db
 }
 
-func (db *realTacitDB) first(out interface{}, where ...interface{}){
+func (db *realTacitDB) first(out interface{}, where ...interface{}) {
 	db.gormDB.First(out, where)
 }
 
@@ -30,3 +32,6 @@ func (db *realTacitDB) where(query interface{}, args ...interface{}) tacitDB {
 	return db
 }
 
+func (db *realTacitDB) error() error {
+	return db.gormDB.Error
+}
