@@ -48,7 +48,6 @@ func main() {
 		dbPassword = "@"
 	}
 
-	// var err error
 	connectionString := dbUser + ":" + dbPassword + "@tcp(127.0.0.1:3306)/" + defaultDb + "?charset=utf8&parseTime=True&loc=Local"
 	// connectionString := "host="+defaultHost+" port="+defaultPort+" user="+defaultUser+" dbname="+defaultDb+" sslmode=disable"
 	dbHandle, err := gorm.Open("mysql", connectionString) // TODO:: enable ssl
@@ -59,14 +58,16 @@ func main() {
 		// TODO :: should exit right away
 	}
 
-	runMigration(&realTacitDB{gormDB: dbHandle})
+	aRealTacitDB := &realTacitDB{
+		gormDB: dbHandle,
+	}
+	runMigration(aRealTacitDB)
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
-	aTacitDB := &realTacitDB{gormDB: dbHandle}
-	anEnv := &env{ourDB: aTacitDB}
+	anEnv := &env{ourDB: aRealTacitDB}
 
 	r.POST("/user", anEnv.doCreateUser)
 

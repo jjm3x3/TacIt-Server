@@ -19,7 +19,6 @@ func (ctx *tacitContextMock) bindJSON(obj interface{}) error {
 	}
 	wobj, k := obj.(*webUser)
 	if k {
-		// fmt.Printf("The user is %v and the password is %v\n", ctx.bindJSONResultWebUser.Username, ctx.bindJSONResultWebUser.Password)
 		wobj.Username = ctx.bindJSONResultWebUser.Username
 		wobj.Password = ctx.bindJSONResultWebUser.Password
 	}
@@ -29,7 +28,6 @@ func (ctx *tacitContextMock) bindJSON(obj interface{}) error {
 
 func (ctx *tacitContextMock) readBody([]byte) (int, error) {
 	return 0, nil
-	// panic("method not implemented")
 }
 
 func (ctx *tacitContextMock) json(code int, obj map[string]interface{}) {

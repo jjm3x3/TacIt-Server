@@ -5,7 +5,6 @@ import (
 )
 
 func TestNothing(t *testing.T) {
-	// result := main()
 	if 1 != 1 {
 		t.Fail()
 	}

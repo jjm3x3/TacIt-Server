@@ -17,6 +17,7 @@ type tacitDBMock struct {
 	//Behavioral Setup
 	firstResultDBUser *dbUser
 	hasError          bool
+	noRecordFound     bool
 }
 
 func (db *tacitDBMock) autoMigrate(values ...interface{}) {
@@ -56,4 +57,9 @@ func (db *tacitDBMock) error() error {
 		return fmt.Errorf("___GENERIC_DATABASE_ERROR___")
 	}
 	return nil
+}
+
+//Mocks gorm NoRecordFound
+func (db *tacitDBMock) recordNotFound() bool {
+	return db.noRecordFound
 }

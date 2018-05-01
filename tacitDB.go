@@ -8,6 +8,7 @@ type tacitDB interface {
 	first(out interface{}, where ...interface{})
 	where(query interface{}, args ...interface{}) tacitDB
 	error() error
+	recordNotFound() bool
 }
 
 type realTacitDB struct {
@@ -34,4 +35,10 @@ func (db *realTacitDB) where(query interface{}, args ...interface{}) tacitDB {
 
 func (db *realTacitDB) error() error {
 	return db.gormDB.Error
+}
+
+//Uses gorm RecordNotFound
+func (db *realTacitDB) recordNotFound() bool {
+	notFound := db.gormDB.RecordNotFound()
+	return notFound
 }

@@ -17,7 +17,6 @@ func createPost(c tacitContext, db tacitDB) {
 	var aPost post
 	err := c.bindJSON(&aPost)
 	if err != nil {
-		// fmt.Println("has headers: ", c.GetHeader("Content-Type"))
 		var body []byte
 		num, err := c.readBody(body)
 		if num <= 0 { // not sure if this is really an error
@@ -29,7 +28,6 @@ func createPost(c tacitContext, db tacitDB) {
 		c.json(400, gin.H{"Error": "There was an error with what you provided"})
 		return
 	}
-	// fmt.Printf("Here is the result: '%v'\n", aPost)
 	db.create(&aPost)
 	c.json(200, gin.H{"status": "success"})
 }

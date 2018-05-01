@@ -31,6 +31,13 @@ func login(c tacitContext, db tacitDB) {
 
 	pwBytes := []byte(login.Password)
 	err = bcrypt.CompareHashAndPassword([]byte(theDbUser.Password), pwBytes)
+
+	//Uses gorm RecordNotFound
+	if db.recordNotFound() {
+		fmt.Println("There was something very wrong when logging in!")
+		c.json(401, gin.H{"Error": "either username or password do not match"})
+		return
+	}
 	if err != nil {
 		fmt.Println("There was something very wrong when logging in!")
 		fmt.Println("err: ", err)
@@ -53,11 +60,18 @@ func createUser(c tacitContext, db tacitDB) {
 
 	theUser := dbUser{Username: aUser.Username}
 
+	//Uses gorm RecordNotFound
+	if !db.recordNotFound() {
+		fmt.Printf("The username is already taken.")
+		c.json(409, gin.H{"Error": "Username already taken."})
+		return
+	}
 	pwBytes := []byte(aUser.Password)
 	pwHashBytes, err := bcrypt.GenerateFromPassword(pwBytes, 10)
 	if err != nil {
 		fmt.Println("There was and error: ", err)
 		c.json(500, gin.H{"Error": "There was an error with creating your password"})
+		return
 	}
 	theUser.Password = string(pwHashBytes)
 
