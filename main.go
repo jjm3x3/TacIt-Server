@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/sirupsen/logrus"
 )
 
 type webUser struct {
@@ -16,7 +17,8 @@ type webUser struct {
 }
 
 type env struct {
-	ourDB tacitDB
+	ourDB  tacitDB
+	logger logrus.FieldLogger
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
@@ -35,7 +37,8 @@ func (e *env) doCreatePost(c *gin.Context) {
 }
 
 func main() {
-	fmt.Println("Hello, World")
+	aLogger := logrus.New()
+	aLogger.Info("Tacit-api has started")
 	// defaultHost := "localhost"
 	// defaultPort := "5432"
 	dbUser := os.Getenv("DB_USER")
@@ -54,7 +57,7 @@ func main() {
 	defer dbHandle.Close()
 
 	if err != nil {
-		fmt.Println("There was an error opeing the db: ", err)
+		aLogger.Errorln("There was an error opeing the db: ", err)
 		// TODO :: should exit right away
 	}
 
@@ -67,7 +70,7 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
-	anEnv := &env{ourDB: aRealTacitDB}
+	anEnv := &env{ourDB: aRealTacitDB, logger: aLogger}
 
 	r.POST("/user", anEnv.doCreateUser)
 
