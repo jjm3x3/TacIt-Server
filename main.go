@@ -33,7 +33,7 @@ func (e *env) doLogin(c *gin.Context) {
 
 func (e *env) doCreatePost(c *gin.Context) {
 	ctx := &realHttpContext{ginCtx: c}
-	createPost(ctx, e.ourDB)
+	createPost(ctx, e.ourDB, e.logger)
 }
 
 func main() {
