@@ -13,7 +13,7 @@ type post struct {
 	Body  string `json:"body"`
 }
 
-func createPost(c tacitContext, db tacitDB) {
+func createPost(c httpContext, db tacitDB) {
 	var aPost post
 	err := c.bindJSON(&aPost)
 	if err != nil {

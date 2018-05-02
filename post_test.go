@@ -8,7 +8,7 @@ import (
 func TestCreatePostReadsBody(t *testing.T) {
 
 	//setup
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		bindJSONIsCalled: false,
 	}
 	db := &tacitDBMock{}
@@ -26,8 +26,8 @@ func TestCreatePostReadsBody(t *testing.T) {
 func TestCreatePostHapyPath(t *testing.T) {
 
 	//setup
-	c := &tacitContextMock{
-		jsonCode:         0,
+	c := &httpContextMock{
+		jsonCode:          0,
 		timesJSONisCalled: 0,
 	}
 	db := &tacitDBMock{}
@@ -49,8 +49,8 @@ func TestCreatePostHapyPath(t *testing.T) {
 func TestCreatePostSadPath(t *testing.T) {
 
 	//setup
-	c := &tacitContextMock{
-		jsonCode: 	0,
+	c := &httpContextMock{
+		jsonCode:          0,
 		timesJSONisCalled: 0,
 		bindJSONDoesError: true,
 	}
@@ -64,15 +64,15 @@ func TestCreatePostSadPath(t *testing.T) {
 	if c.jsonCode != 400 {
 		t.Errorf("The expected http status code is 400 for sad path. The current status code is %v", c.jsonCode)
 	}
-	if c.timesJSONisCalled !=1 {
+	if c.timesJSONisCalled != 1 {
 		t.Errorf("json should be called on teh context exactly once but instead was called %v times", c.timesJSONisCalled)
 	}
-	
+
 }
 func TestCreatePostSavesPost(t *testing.T) {
 
 	//setup
-	c := &tacitContextMock{}
+	c := &httpContextMock{}
 	db := &tacitDBMock{timesCreateWasCalled: 0}
 	expectedDbCreates := 1
 

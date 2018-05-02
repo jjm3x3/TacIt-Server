@@ -22,17 +22,17 @@ type env struct {
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
-	ctx := &realTacitContext{ginCtx: c}
+	ctx := &realHttpContext{ginCtx: c}
 	createUser(ctx, e.ourDB)
 }
 
 func (e *env) doLogin(c *gin.Context) {
-	ctx := &realTacitContext{ginCtx: c}
+	ctx := &realHttpContext{ginCtx: c}
 	login(ctx, e.ourDB)
 }
 
 func (e *env) doCreatePost(c *gin.Context) {
-	ctx := &realTacitContext{ginCtx: c}
+	ctx := &realHttpContext{ginCtx: c}
 	createPost(ctx, e.ourDB)
 }
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type tacitContextMock struct {
+type httpContextMock struct {
 	bindJSONIsCalled      bool
 	jsonCode              int
 	timesJSONisCalled     int
@@ -12,7 +12,7 @@ type tacitContextMock struct {
 	bindJSONResultWebUser *webUser
 }
 
-func (ctx *tacitContextMock) bindJSON(obj interface{}) error {
+func (ctx *httpContextMock) bindJSON(obj interface{}) error {
 	ctx.bindJSONIsCalled = true
 	if ctx.bindJSONDoesError {
 		return fmt.Errorf("error")
@@ -26,11 +26,11 @@ func (ctx *tacitContextMock) bindJSON(obj interface{}) error {
 
 }
 
-func (ctx *tacitContextMock) readBody([]byte) (int, error) {
+func (ctx *httpContextMock) readBody([]byte) (int, error) {
 	return 0, nil
 }
 
-func (ctx *tacitContextMock) json(code int, obj map[string]interface{}) {
+func (ctx *httpContextMock) json(code int, obj map[string]interface{}) {
 	ctx.jsonCode = code
 	ctx.timesJSONisCalled++
 }

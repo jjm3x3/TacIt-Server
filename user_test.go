@@ -12,7 +12,7 @@ func TestLoginReadsBody(t *testing.T) {
 
 	aDBUser := &dbUser{}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		bindJSONIsCalled:      false,
 		bindJSONResultWebUser: aWebUser,
 	}
@@ -39,7 +39,7 @@ func TestLoginHappyPath(t *testing.T) {
 		Password: aWebUser.Password,
 	}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		jsonCode:              0,
 		timesJSONisCalled:     0,
 		bindJSONResultWebUser: aWebUser,
@@ -68,7 +68,7 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 
 	aDBUser := &dbUser{}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		jsonCode:              0,
 		timesJSONisCalled:     0,
 		bindJSONResultWebUser: aWebUser,
@@ -99,7 +99,7 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 		Password: aWebUser.Password + "d",
 	}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		jsonCode:              0,
 		timesJSONisCalled:     0,
 		bindJSONResultWebUser: aWebUser,
@@ -119,7 +119,7 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 }
 
 func TestLoginBindError(t *testing.T) {
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		jsonCode:          0,
 		timesJSONisCalled: 0,
 		bindJSONDoesError: true,
@@ -150,7 +150,7 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 		Password: aWebUser.Password,
 	}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		jsonCode:              0,
 		timesJSONisCalled:     0,
 		bindJSONResultWebUser: aWebUser,
@@ -176,7 +176,7 @@ func TestCreateUserReadsBody(t *testing.T) {
 		Password: "Password",
 	}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		bindJSONIsCalled:      false,
 		bindJSONResultWebUser: aWebUser,
 	}
@@ -197,7 +197,7 @@ func TestCreateUserHappyPath(t *testing.T) {
 		Password: "Password",
 	}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		jsonCode:              0,
 		timesJSONisCalled:     0,
 		bindJSONResultWebUser: aWebUser,
@@ -216,7 +216,7 @@ func TestCreateUserHappyPath(t *testing.T) {
 }
 
 func TestCreateUserBindError(t *testing.T) {
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		jsonCode:          0,
 		timesJSONisCalled: 0,
 		bindJSONDoesError: true,
@@ -243,7 +243,7 @@ func TestCreateUserSavesUser(t *testing.T) {
 		Password: "Password",
 	}
 	//setup
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDBMock{
@@ -267,7 +267,7 @@ func TestCreateUserPasswordStoredProperly(t *testing.T) {
 		Password: "Password",
 	}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDBMock{}
@@ -283,7 +283,7 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 		Password: "Password",
 	}
 
-	c := &tacitContextMock{
+	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDBMock{
