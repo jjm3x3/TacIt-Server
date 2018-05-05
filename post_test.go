@@ -2,6 +2,7 @@ package main
 
 import (
 	"TacIt-go/mocks"
+	tacitDb "TacIt-go/db"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -83,7 +84,7 @@ func TestCreatePostReadsBody(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONIsCalled: false,
 	}
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{}
 	logger := &loggerMock{}
 
 	//execution
@@ -103,7 +104,7 @@ func TestCreatePostHapyPath(t *testing.T) {
 		jsonCode:          0,
 		timesJSONisCalled: 0,
 	}
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{}
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -120,7 +121,7 @@ func TestCreatePostHapyPath(t *testing.T) {
 	}
 
 	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+		t.Errorf("json should be called on the context exactly once but instead was called %v Times", c.timesJSONisCalled)
 	}
 
 }
@@ -134,7 +135,7 @@ func TestCreatePostSadPath(t *testing.T) {
 		bindJSONDoesError: true,
 	}
 
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{}
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -160,7 +161,7 @@ func TestCreatePostSavesPost(t *testing.T) {
 
 	//setup
 	c := &httpContextMock{}
-	db := &tacitDBMock{timesCreateWasCalled: 0}
+	db := &tacitDb.TacitDBMock{TimesCreateWasCalled: 0}
 	expectedDbCreates := 1
 
 	logger := &loggerMock{}
@@ -169,8 +170,8 @@ func TestCreatePostSavesPost(t *testing.T) {
 	createPost(c, db, logger)
 
 	//assertions
-	if db.timesCreateWasCalled != expectedDbCreates {
-		t.Errorf("db.create is expected to be called %v time(s) but instead was called %v time(s)", expectedDbCreates, db.timesCreateWasCalled)
+	if db.TimesCreateWasCalled != expectedDbCreates {
+		t.Errorf("db.create is expected to be called %v time(s) but instead was called %v time(s)", expectedDbCreates, db.TimesCreateWasCalled)
 	}
 }
 

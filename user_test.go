@@ -1,7 +1,11 @@
 package main
 
 import (
+	tacitDb "TacIt-go/db"
+	"TacIt-go/mocks"
 	"testing"
+
+	"github.com/golang/mock/gomock"
 )
 
 func TestLoginReadsBody(t *testing.T) {
@@ -10,15 +14,15 @@ func TestLoginReadsBody(t *testing.T) {
 		Password: "Password",
 	}
 
-	aDBUser := &dbUser{}
+	aDBUser := &tacitDb.DbUser{}
 
 	c := &httpContextMock{
 		bindJSONIsCalled:      false,
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	login(c, db)
@@ -34,7 +38,7 @@ func TestLoginHappyPath(t *testing.T) {
 		Password: "Password",
 	}
 
-	aDBUser := &dbUser{
+	aDBUser := &tacitDb.DbUser{
 		Username: aWebUser.Username,
 		Password: aWebUser.Password,
 	}
@@ -45,8 +49,14 @@ func TestLoginHappyPath(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
+<<<<<<< HEAD
 	db := &tacitDBMock{
 		firstResultDBUser: aDBUser,
+=======
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
+		NoRecordFound:     false,
+>>>>>>> Try gomock for mocking function dependencies
 	}
 
 	login(c, db)
@@ -66,7 +76,7 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 		Password: "Password",
 	}
 
-	aDBUser := &dbUser{}
+	aDBUser := &tacitDb.DbUser{}
 
 	c := &httpContextMock{
 		jsonCode:              0,
@@ -74,8 +84,8 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	login(c, db)
@@ -94,7 +104,7 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 		Password: "Passwor",
 	}
 
-	aDBUser := &dbUser{
+	aDBUser := &tacitDb.DbUser{
 		Username: aWebUser.Username,
 		Password: aWebUser.Password + "d",
 	}
@@ -105,8 +115,8 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	login(c, db)
@@ -125,9 +135,9 @@ func TestLoginBindError(t *testing.T) {
 		bindJSONDoesError: true,
 	}
 
-	aDBUser := &dbUser{}
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	aDBUser := &tacitDb.DbUser{}
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	login(c, db)
@@ -145,7 +155,7 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 		Password: "Password",
 	}
 
-	aDBUser := &dbUser{
+	aDBUser := &tacitDb.DbUser{
 		Username: aWebUser.Username,
 		Password: aWebUser.Password,
 	}
@@ -156,9 +166,9 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
-		noRecordFound:     true,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
+		NoRecordFound:     true,
 	}
 
 	login(c, db)
@@ -181,7 +191,7 @@ func TestCreateUserReadsBody(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{}
 
 	createUser(c, db)
 
@@ -203,7 +213,13 @@ func TestCreateUserHappyPath(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
+<<<<<<< HEAD
 	db := &tacitDBMock{}
+=======
+	db := &tacitDb.TacitDBMock{
+		NoRecordFound: true,
+	}
+>>>>>>> Try gomock for mocking function dependencies
 
 	createUser(c, db)
 
@@ -222,9 +238,9 @@ func TestCreateUserBindError(t *testing.T) {
 		bindJSONDoesError: true,
 	}
 
-	aDBUser := &dbUser{}
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	aDBUser := &tacitDb.DbUser{}
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	createUser(c, db)
@@ -246,17 +262,23 @@ func TestCreateUserSavesUser(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
+<<<<<<< HEAD
 	db := &tacitDBMock{
 		timesCreateWasCalled: 0,
 	}
+=======
+	db := &tacitDb.TacitDBMock{
+		TimesCreateWasCalled: 0,
+		NoRecordFound:        true}
+>>>>>>> Try gomock for mocking function dependencies
 	expectedDbCreates := 1
 
 	//execution
 	createUser(c, db)
 
 	//assertions
-	if db.timesCreateWasCalled != expectedDbCreates {
-		t.Errorf("db.create is expected to be called %v time(s) but instead was called %v time(s)", expectedDbCreates, db.timesCreateWasCalled)
+	if db.TimesCreateWasCalled != expectedDbCreates {
+		t.Errorf("db.create is expected to be called %v time(s) but instead was called %v time(s)", expectedDbCreates, db.TimesCreateWasCalled)
 	}
 
 }
@@ -270,9 +292,9 @@ func TestCreateUserPasswordStoredProperly(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{}
 	createUser(c, db)
-	if aWebUser.Password == db.storedPassword {
+	if aWebUser.Password == db.StoredPassword {
 		t.Errorf("Password stored in plain text.")
 	}
 }
@@ -286,8 +308,14 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
+<<<<<<< HEAD
 	db := &tacitDBMock{
 		hasError: true,
+=======
+	db := &tacitDb.TacitDBMock{
+		HasError:      true,
+		NoRecordFound: true,
+>>>>>>> Try gomock for mocking function dependencies
 	}
 
 	createUser(c, db)
@@ -299,3 +327,35 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 	}
 
 }
+<<<<<<< HEAD
+=======
+
+//Mocks gorm NoRecordFound
+func TestCreateUserConflictError(t *testing.T) {
+	aWebUser := &webUser{
+		Username: "Username",
+		Password: "Password",
+	}
+
+	c := &httpContextMock{
+		bindJSONResultWebUser: aWebUser,
+	}
+
+	// db := &tacitDb.TacitDBMock{
+	// 	NoRecordFound: false,
+	// }
+
+	mockCtrl := gomock.NewController(t)
+	mockDb := mocks.NewMockTacitDB(mockCtrl)
+	mockDb.EXPECT().RecordNotFound().Return(false)
+
+	createUser(c, mockDb)
+	if c.jsonCode != 409 {
+		t.Errorf("The expected http status code is 409 for user database creation error. The current status code was %v", c.jsonCode)
+	}
+	if c.timesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	}
+
+}
+>>>>>>> Try gomock for mocking function dependencies

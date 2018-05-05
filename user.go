@@ -3,18 +3,12 @@ package main
 import (
 	"fmt"
 
+	tacitDb "TacIt-go/db"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type dbUser struct {
-	gorm.Model
-	Username string
-	Password string
-}
-
-func login(c httpContext, db tacitDB) {
+func login(c httpContext, db tacitDb.TacitDB) {
 	var login webUser
 	err := c.bindJSON(&login)
 	if err != nil {
@@ -37,7 +31,6 @@ func login(c httpContext, db tacitDB) {
 
 	pwBytes := []byte(login.Password)
 	err = bcrypt.CompareHashAndPassword([]byte(theDbUser.Password), pwBytes)
-
 	if err != nil {
 		fmt.Println("There was something very wrong when logging in!")
 		fmt.Println("err: ", err)
@@ -48,7 +41,7 @@ func login(c httpContext, db tacitDB) {
 	}
 }
 
-func createUser(c httpContext, db tacitDB) {
+func createUser(c httpContext, db tacitDb.TacitDB) {
 	var aUser webUser
 	err := c.bindJSON(&aUser)
 	if err != nil {
@@ -58,7 +51,7 @@ func createUser(c httpContext, db tacitDB) {
 	}
 	fmt.Println("Here is the user to create: ", aUser)
 
-	theUser := dbUser{Username: aUser.Username}
+	theUser := tacitDb.DbUser{Username: aUser.Username}
 
 	pwBytes := []byte(aUser.Password)
 	pwHashBytes, err := bcrypt.GenerateFromPassword(pwBytes, 10)
@@ -71,7 +64,7 @@ func createUser(c httpContext, db tacitDB) {
 
 	fmt.Println("Here is the user That will be created: ", theUser)
 
-	err = db.create(&theUser).error()
+	err = db.Create(&theUser).Error()
 	if err != nil {
 		fmt.Println("There was an issue creating user: ", err)
 		c.json(500, gin.H{"Error": "There was an error with creating your user"})
