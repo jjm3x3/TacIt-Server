@@ -4,6 +4,8 @@ import (
 	// "fmt"
 	"os"
 
+	"tacit-api/db"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -17,7 +19,7 @@ type webUser struct {
 }
 
 type env struct {
-	ourDB  tacitDB
+	ourDB  db.TacitDB
 	logger logrus.FieldLogger
 }
 
@@ -61,10 +63,11 @@ func main() {
 		// TODO :: should exit right away
 	}
 
-	aRealTacitDB := &realTacitDB{
-		gormDB: dbHandle,
+	aRealTacitDB := &db.RealTacitDB{
+		GormDB: dbHandle,
 	}
-	runMigration(aRealTacitDB)
+
+	db.RunMigration(aRealTacitDB)
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -79,10 +82,4 @@ func main() {
 	r.POST("/note", anEnv.doCreatePost)
 
 	r.Run()
-}
-
-func runMigration(db tacitDB) {
-	// probably doesn't need to happen every time
-	db.autoMigrate(&post{})
-	db.autoMigrate(&dbUser{})
 }

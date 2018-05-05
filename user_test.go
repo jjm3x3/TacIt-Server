@@ -1,6 +1,7 @@
 package main
 
 import (
+	tacitDb "tacit-api/db"
 	"testing"
 )
 
@@ -10,15 +11,15 @@ func TestLoginReadsBody(t *testing.T) {
 		Password: "Password",
 	}
 
-	aDBUser := &dbUser{}
+	aDBUser := &tacitDb.DbUser{}
 
 	c := &httpContextMock{
 		bindJSONIsCalled:      false,
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	login(c, db)
@@ -34,7 +35,7 @@ func TestLoginHappyPath(t *testing.T) {
 		Password: "Password",
 	}
 
-	aDBUser := &dbUser{
+	aDBUser := &tacitDb.DbUser{
 		Username: aWebUser.Username,
 		Password: aWebUser.Password,
 	}
@@ -45,8 +46,9 @@ func TestLoginHappyPath(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
+		NoRecordFound:     false,
 	}
 
 	login(c, db)
@@ -66,7 +68,7 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 		Password: "Password",
 	}
 
-	aDBUser := &dbUser{}
+	aDBUser := &tacitDb.DbUser{}
 
 	c := &httpContextMock{
 		jsonCode:              0,
@@ -74,8 +76,8 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	login(c, db)
@@ -94,7 +96,7 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 		Password: "Passwor",
 	}
 
-	aDBUser := &dbUser{
+	aDBUser := &tacitDb.DbUser{
 		Username: aWebUser.Username,
 		Password: aWebUser.Password + "d",
 	}
@@ -105,8 +107,8 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	login(c, db)
@@ -125,9 +127,9 @@ func TestLoginBindError(t *testing.T) {
 		bindJSONDoesError: true,
 	}
 
-	aDBUser := &dbUser{}
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	aDBUser := &tacitDb.DbUser{}
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	login(c, db)
@@ -145,7 +147,7 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 		Password: "Password",
 	}
 
-	aDBUser := &dbUser{
+	aDBUser := &tacitDb.DbUser{
 		Username: aWebUser.Username,
 		Password: aWebUser.Password,
 	}
@@ -156,9 +158,9 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
-		noRecordFound:     true,
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
+		NoRecordFound:     true,
 	}
 
 	login(c, db)
@@ -181,7 +183,7 @@ func TestCreateUserReadsBody(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{}
 
 	createUser(c, db)
 
@@ -203,7 +205,9 @@ func TestCreateUserHappyPath(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{
+		NoRecordFound: true,
+	}
 
 	createUser(c, db)
 
@@ -222,9 +226,9 @@ func TestCreateUserBindError(t *testing.T) {
 		bindJSONDoesError: true,
 	}
 
-	aDBUser := &dbUser{}
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
+	aDBUser := &tacitDb.DbUser{}
+	db := &tacitDb.TacitDBMock{
+		FirstResultDBUser: aDBUser,
 	}
 
 	createUser(c, db)
@@ -246,17 +250,17 @@ func TestCreateUserSavesUser(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
-	db := &tacitDBMock{
-		timesCreateWasCalled: 0,
-	}
+	db := &tacitDb.TacitDBMock{
+		TimesCreateWasCalled: 0,
+		NoRecordFound:        true}
 	expectedDbCreates := 1
 
 	//execution
 	createUser(c, db)
 
 	//assertions
-	if db.timesCreateWasCalled != expectedDbCreates {
-		t.Errorf("db.create is expected to be called %v time(s) but instead was called %v time(s)", expectedDbCreates, db.timesCreateWasCalled)
+	if db.TimesCreateWasCalled != expectedDbCreates {
+		t.Errorf("db.create is expected to be called %v time(s) but instead was called %v time(s)", expectedDbCreates, db.TimesCreateWasCalled)
 	}
 
 }
@@ -270,9 +274,9 @@ func TestCreateUserPasswordStoredProperly(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{}
 	createUser(c, db)
-	if aWebUser.Password == db.storedPassword {
+	if aWebUser.Password == db.StoredPassword {
 		t.Errorf("Password stored in plain text.")
 	}
 }
@@ -286,8 +290,9 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
-	db := &tacitDBMock{
-		hasError: true,
+	db := &tacitDb.TacitDBMock{
+		HasError:      true,
+		NoRecordFound: true,
 	}
 
 	createUser(c, db)

@@ -1,19 +1,14 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
+	tacitDB "tacit-api/db"
+
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
-type post struct {
-	gorm.Model
-	Title string `json:"title"`
-	Body  string `json:"body"`
-}
-
-func createPost(c httpContext, db tacitDB, logger logrus.FieldLogger) {
-	var aPost post
+func createPost(c httpContext, db tacitDB.TacitDB, logger logrus.FieldLogger) {
+	var aPost tacitDB.Post
 	err := c.bindJSON(&aPost)
 	if err != nil {
 		var body []byte
@@ -27,6 +22,6 @@ func createPost(c httpContext, db tacitDB, logger logrus.FieldLogger) {
 		c.json(400, gin.H{"Error": "There was an error with what you provided"})
 		return
 	}
-	db.create(&aPost)
+	db.Create(&aPost)
 	c.json(200, gin.H{"status": "success"})
 }
