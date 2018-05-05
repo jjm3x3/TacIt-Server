@@ -4,7 +4,7 @@ import (
 	// "fmt"
 	"os"
 
-	"TacIt-go/db"
+	"tacit-api/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"

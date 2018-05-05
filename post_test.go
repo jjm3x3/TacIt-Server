@@ -1,8 +1,8 @@
 package main
 
 import (
-	"TacIt-go/mocks"
-	tacitDb "TacIt-go/db"
+	tacitDb "tacit-api/db"
+	"tacit-api/mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -181,7 +181,7 @@ func TestCreatePostBindJSONFailureLogsError(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONDoesError: true,
 	}
-	db := &tacitDBMock{}
+	db := &tacitDb.TacitDBMock{}
 
 	logger := &loggerMock{}
 

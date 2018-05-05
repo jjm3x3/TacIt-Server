@@ -1,7 +1,7 @@
 package main
 
 import (
-	tacitDB "TacIt-go/db"
+	tacitDB "tacit-api/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -9,7 +9,7 @@ import (
 
 func createPost(c httpContext, db tacitDB.TacitDB, logger logrus.FieldLogger) {
 	var aPost tacitDB.Post
-	 err := c.bindJSON(&aPost)
+	err := c.bindJSON(&aPost)
 	if err != nil {
 		var body []byte
 		num, err := c.readBody(body)

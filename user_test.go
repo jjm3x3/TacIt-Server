@@ -1,11 +1,8 @@
 package main
 
 import (
-	tacitDb "TacIt-go/db"
-	"TacIt-go/mocks"
+	tacitDb "tacit-api/db"
 	"testing"
-
-	"github.com/golang/mock/gomock"
 )
 
 func TestLoginReadsBody(t *testing.T) {
@@ -49,14 +46,9 @@ func TestLoginHappyPath(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-<<<<<<< HEAD
-	db := &tacitDBMock{
-		firstResultDBUser: aDBUser,
-=======
 	db := &tacitDb.TacitDBMock{
 		FirstResultDBUser: aDBUser,
 		NoRecordFound:     false,
->>>>>>> Try gomock for mocking function dependencies
 	}
 
 	login(c, db)
@@ -213,13 +205,9 @@ func TestCreateUserHappyPath(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-<<<<<<< HEAD
-	db := &tacitDBMock{}
-=======
 	db := &tacitDb.TacitDBMock{
 		NoRecordFound: true,
 	}
->>>>>>> Try gomock for mocking function dependencies
 
 	createUser(c, db)
 
@@ -262,15 +250,9 @@ func TestCreateUserSavesUser(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
-<<<<<<< HEAD
-	db := &tacitDBMock{
-		timesCreateWasCalled: 0,
-	}
-=======
 	db := &tacitDb.TacitDBMock{
 		TimesCreateWasCalled: 0,
 		NoRecordFound:        true}
->>>>>>> Try gomock for mocking function dependencies
 	expectedDbCreates := 1
 
 	//execution
@@ -308,14 +290,9 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 	c := &httpContextMock{
 		bindJSONResultWebUser: aWebUser,
 	}
-<<<<<<< HEAD
-	db := &tacitDBMock{
-		hasError: true,
-=======
 	db := &tacitDb.TacitDBMock{
 		HasError:      true,
 		NoRecordFound: true,
->>>>>>> Try gomock for mocking function dependencies
 	}
 
 	createUser(c, db)
@@ -327,35 +304,3 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 	}
 
 }
-<<<<<<< HEAD
-=======
-
-//Mocks gorm NoRecordFound
-func TestCreateUserConflictError(t *testing.T) {
-	aWebUser := &webUser{
-		Username: "Username",
-		Password: "Password",
-	}
-
-	c := &httpContextMock{
-		bindJSONResultWebUser: aWebUser,
-	}
-
-	// db := &tacitDb.TacitDBMock{
-	// 	NoRecordFound: false,
-	// }
-
-	mockCtrl := gomock.NewController(t)
-	mockDb := mocks.NewMockTacitDB(mockCtrl)
-	mockDb.EXPECT().RecordNotFound().Return(false)
-
-	createUser(c, mockDb)
-	if c.jsonCode != 409 {
-		t.Errorf("The expected http status code is 409 for user database creation error. The current status code was %v", c.jsonCode)
-	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
-	}
-
-}
->>>>>>> Try gomock for mocking function dependencies

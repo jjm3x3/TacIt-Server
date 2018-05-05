@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 
-	tacitDb "TacIt-go/db"
+	tacitDb "tacit-api/db"
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,14 +19,13 @@ func login(c httpContext, db tacitDb.TacitDB) {
 	}
 	fmt.Println("Here is the user info used to login: ", login)
 
-	var theDbUser dbUser
-	db.where("username = ?", login.Username).first(&theDbUser)
-	if db.recordNotFound() {
-			//Questionable Error return
-			c.json(401, gin.H{"Error": "User does not exist"})
-			return
-		}
-
+	var theDbUser tacitDb.DbUser
+	db.Where("username = ?", login.Username).First(&theDbUser)
+	if db.RecordNotFound() {
+		//Questionable Error return
+		c.json(401, gin.H{"Error": "User does not exist"})
+		return
+	}
 
 	fmt.Println("Found this user from db: ", theDbUser)
 
