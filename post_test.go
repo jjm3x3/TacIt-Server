@@ -1,8 +1,10 @@
 package main
 
 import (
+	"TacIt-go/mocks"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	// "fmt"
 )
@@ -103,10 +105,14 @@ func TestCreatePostHapyPath(t *testing.T) {
 	}
 	db := &tacitDBMock{}
 
-	logger := &loggerMock{}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
+	// logger := &loggerMock{}
 
 	//execution
-	createPost(c, db, logger)
+	createPost(c, db, mockLogger)
 
 	//assertions
 	if c.jsonCode != 200 {
@@ -130,10 +136,16 @@ func TestCreatePostSadPath(t *testing.T) {
 
 	db := &tacitDBMock{}
 
-	logger := &loggerMock{}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
+	mockLogger.EXPECT().Error("There was no body provided")
+	mockLogger.EXPECT().Errorf("There was an error binding to aPost: %v", gomock.Any())
+	// logger := &loggerMock{}
 
 	//execution
-	createPost(c, db, logger)
+	createPost(c, db, mockLogger)
 
 	//assertions
 	if c.jsonCode != 400 {
