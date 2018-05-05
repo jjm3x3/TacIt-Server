@@ -13,6 +13,7 @@ testing:
     - cp -R . /root/src/tacit-api
     - cd /root/src/tacit-api
     - dep ensure
+    - chmod +x ./scripts/runTest.sh
     - ./scripts/runTest.sh
     - go test
 
