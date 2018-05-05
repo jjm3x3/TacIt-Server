@@ -1,7 +1,23 @@
 image:
   name: "us.gcr.io/tacit-196502/go-build:master"
+  
+stages: 
+  - testing
+  - build
+  - deploy
+
+testing:
+  stage: testing
+  script:
+    - mkdir -p /root/src/tacit-api
+    - cp -R . /root/src/tacit-api
+    - cd /root/src/tacit-api
+    - dep ensure
+    - go test
+    - echo $?
 
 build:
+  stage: build
   script:
     - docker login -u _json_key -p "$DOCKER_PASSWORD" https://us.gcr.io
     - mkdir -p /root/src/tacit-api
@@ -10,17 +26,20 @@ build:
     - dep ensure
     - CGO_ENABLED=0 go build
     - docker build -t us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA .
-    - docker tag us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+    - export DOCKER_FRIENDLY_REF_NAME=$(echo $CI_COMMIT_REF_NAME | sed "s/\//_/g")
+    - docker tag us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$DOCKER_FRIENDLY_REF_NAME
     - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_SHA
-    - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+    - docker push us.gcr.io/tacit-196502/$CI_PROJECT_NAME:$DOCKER_FRIENDLY_REF_NAME
     
 .deploy_template: &deploy_dev
+  stage: deploy
   script:
     - export jkey=$(mktemp)
     - echo "$DOCKER_PASSWORD" > $jkey
     - gcloud auth activate-service-account --key-file=$jkey
     - gcloud container clusters get-credentials tacit-dev --zone us-central1-a --project tacit-196502
-    - sed "s/{{TAG}}/$CI_COMMIT_REF_NAME/g" kube/deployment.yaml > kube/finalDeployment.yaml
+    - export DOCKER_FRIENDLY_REF_NAME=$(echo $CI_COMMIT_REF_NAME | sed "s/\//_/g")
+    - sed "s/{{TAG}}/$DOCKER_FRIENDLY_REF_NAME/g" kube/deployment.yaml > kube/finalDeployment.yaml
     - kubectl apply -f ./kube/finalDeployment.yaml
     - rm $jkey
     
