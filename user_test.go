@@ -47,7 +47,6 @@ func TestLoginHappyPath(t *testing.T) {
 
 	db := &tacitDBMock{
 		firstResultDBUser: aDBUser,
-		noRecordFound:     false,
 	}
 
 	login(c, db)
@@ -140,8 +139,6 @@ func TestLoginBindError(t *testing.T) {
 	}
 
 }
-
-//Mocks gorm NoRecordFound
 func TestLoginUserDoesNotExistError(t *testing.T) {
 	aWebUser := &webUser{
 		Username: "Username",
@@ -167,7 +164,7 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 	login(c, db)
 
 	if c.jsonCode != 401 {
-		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
+		t.Errorf("The expected http status code is 401 for this path. The current status code was %v", c.jsonCode)
 	}
 	if c.timesJSONisCalled != 1 {
 		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
@@ -206,9 +203,7 @@ func TestCreateUserHappyPath(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 
-	db := &tacitDBMock{
-		noRecordFound: true,
-	}
+	db := &tacitDBMock{}
 
 	createUser(c, db)
 
@@ -253,7 +248,7 @@ func TestCreateUserSavesUser(t *testing.T) {
 	}
 	db := &tacitDBMock{
 		timesCreateWasCalled: 0,
-		noRecordFound:        true}
+	}
 	expectedDbCreates := 1
 
 	//execution
@@ -292,37 +287,12 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDBMock{
-		hasError:      true,
-		noRecordFound: true,
+		hasError: true,
 	}
 
 	createUser(c, db)
 	if c.jsonCode != 500 {
 		t.Errorf("The expected http status code is 500 for user database creation error. The current status code was %v", c.jsonCode)
-	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
-	}
-
-}
-
-//Mocks gorm NoRecordFound
-func TestCreateUserConflictError(t *testing.T) {
-	aWebUser := &webUser{
-		Username: "Username",
-		Password: "Password",
-	}
-
-	c := &tacitContextMock{
-		bindJSONResultWebUser: aWebUser,
-	}
-	db := &tacitDBMock{
-		noRecordFound: false,
-	}
-
-	createUser(c, db)
-	if c.jsonCode != 409 {
-		t.Errorf("The expected http status code is 409 for user database creation error. The current status code was %v", c.jsonCode)
 	}
 	if c.timesJSONisCalled != 1 {
 		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
