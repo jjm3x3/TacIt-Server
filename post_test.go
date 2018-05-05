@@ -2,8 +2,76 @@ package main
 
 import (
 	"testing"
+
+	"github.com/sirupsen/logrus"
 	// "fmt"
 )
+
+type loggerMock struct {
+}
+
+func (logger *loggerMock) WithField(key string, value interface{}) *logrus.Entry {
+	return nil
+}
+
+func (logger *loggerMock) WithFields(fields logrus.Fields) *logrus.Entry {
+	return nil
+}
+
+func (logger *loggerMock) WithError(err error) *logrus.Entry {
+	return nil
+}
+
+func (logger *loggerMock) Debugf(format string, args ...interface{}) {
+}
+func (logger *loggerMock) Infof(format string, args ...interface{}) {
+}
+func (logger *loggerMock) Printf(format string, args ...interface{}) {
+}
+func (logger *loggerMock) Warnf(format string, args ...interface{}) {
+}
+func (logger *loggerMock) Warningf(format string, args ...interface{}) {
+}
+func (logger *loggerMock) Errorf(format string, args ...interface{}) {
+}
+func (logger *loggerMock) Fatalf(format string, args ...interface{}) {
+}
+func (logger *loggerMock) Panicf(format string, args ...interface{}) {
+}
+
+func (logger *loggerMock) Debug(args ...interface{}) {
+}
+func (logger *loggerMock) Info(args ...interface{}) {
+}
+func (logger *loggerMock) Print(args ...interface{}) {
+}
+func (logger *loggerMock) Warn(args ...interface{}) {
+}
+func (logger *loggerMock) Warning(args ...interface{}) {
+}
+func (logger *loggerMock) Error(args ...interface{}) {
+}
+func (logger *loggerMock) Fatal(args ...interface{}) {
+}
+func (logger *loggerMock) Panic(args ...interface{}) {
+}
+
+func (logger *loggerMock) Debugln(args ...interface{}) {
+}
+func (logger *loggerMock) Infoln(args ...interface{}) {
+}
+func (logger *loggerMock) Println(args ...interface{}) {
+}
+func (logger *loggerMock) Warnln(args ...interface{}) {
+}
+func (logger *loggerMock) Warningln(args ...interface{}) {
+}
+func (logger *loggerMock) Errorln(args ...interface{}) {
+}
+func (logger *loggerMock) Fatalln(args ...interface{}) {
+}
+func (logger *loggerMock) Panicln(args ...interface{}) {
+}
 
 func TestCreatePostReadsBody(t *testing.T) {
 
@@ -12,9 +80,10 @@ func TestCreatePostReadsBody(t *testing.T) {
 		bindJSONIsCalled: false,
 	}
 	db := &tacitDBMock{}
+	logger := &loggerMock{}
 
 	//execution
-	createPost(c, db)
+	createPost(c, db, logger)
 
 	//assertions
 	if !c.bindJSONIsCalled {
@@ -32,8 +101,10 @@ func TestCreatePostHapyPath(t *testing.T) {
 	}
 	db := &tacitDBMock{}
 
+	logger := &loggerMock{}
+
 	//execution
-	createPost(c, db)
+	createPost(c, db, logger)
 
 	//assertions
 	if c.jsonCode != 200 {
@@ -57,8 +128,10 @@ func TestCreatePostSadPath(t *testing.T) {
 
 	db := &tacitDBMock{}
 
+	logger := &loggerMock{}
+
 	//execution
-	createPost(c, db)
+	createPost(c, db, logger)
 
 	//assertions
 	if c.jsonCode != 400 {
@@ -76,8 +149,10 @@ func TestCreatePostSavesPost(t *testing.T) {
 	db := &tacitDBMock{timesCreateWasCalled: 0}
 	expectedDbCreates := 1
 
+	logger := &loggerMock{}
+
 	//execution
-	createPost(c, db)
+	createPost(c, db, logger)
 
 	//assertions
 	if db.timesCreateWasCalled != expectedDbCreates {
