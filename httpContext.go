@@ -4,26 +4,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-
-type tacitContext interface {
+type httpContext interface {
 	bindJSON(obj interface{}) error
 	readBody([]byte) (int, error)
 	json(int, map[string]interface{})
 }
 
-type realTacitContext struct {
+type realHttpContext struct {
 	ginCtx *gin.Context
 }
 
-func (ctx *realTacitContext) bindJSON(obj interface{}) error {
+func (ctx *realHttpContext) bindJSON(obj interface{}) error {
 	panic("method not implemented")
 }
 
-func (ctx *realTacitContext) readBody([]byte) (int, error) {
+func (ctx *realHttpContext) readBody([]byte) (int, error) {
 	panic("method not implemented")
 }
 
-func (ctx *realTacitContext) json(int, map[string]interface{}) {
+func (ctx *realHttpContext) json(int, map[string]interface{}) {
 	panic("method not implemented")
 }

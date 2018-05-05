@@ -14,7 +14,7 @@ type dbUser struct {
 	Password string
 }
 
-func login(c tacitContext, db tacitDB) {
+func login(c httpContext, db tacitDB) {
 	var login webUser
 	err := c.bindJSON(&login)
 	if err != nil {
@@ -48,7 +48,7 @@ func login(c tacitContext, db tacitDB) {
 	}
 }
 
-func createUser(c tacitContext, db tacitDB) {
+func createUser(c httpContext, db tacitDB) {
 	var aUser webUser
 	err := c.bindJSON(&aUser)
 	if err != nil {
