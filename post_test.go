@@ -8,6 +8,7 @@ import (
 )
 
 type loggerMock struct {
+	errorMessage string
 }
 
 func (logger *loggerMock) WithField(key string, value interface{}) *logrus.Entry {
@@ -33,6 +34,7 @@ func (logger *loggerMock) Warnf(format string, args ...interface{}) {
 func (logger *loggerMock) Warningf(format string, args ...interface{}) {
 }
 func (logger *loggerMock) Errorf(format string, args ...interface{}) {
+	logger.errorMessage = format
 }
 func (logger *loggerMock) Fatalf(format string, args ...interface{}) {
 }
@@ -157,5 +159,25 @@ func TestCreatePostSavesPost(t *testing.T) {
 	//assertions
 	if db.timesCreateWasCalled != expectedDbCreates {
 		t.Errorf("db.create is expected to be called %v time(s) but instead was called %v time(s)", expectedDbCreates, db.timesCreateWasCalled)
+	}
+}
+
+func TestCreatePostBindJSONFailureLogsError(t *testing.T) {
+
+	//setup
+	c := &httpContextMock{
+		bindJSONDoesError: true,
+	}
+	db := &tacitDBMock{}
+
+	logger := &loggerMock{}
+
+	//execution
+	createPost(c, db, logger)
+
+	expectedMessage := "There was an error binding to aPost: %v"
+	//assertions
+	if logger.errorMessage != expectedMessage {
+		t.Errorf("In the case of a bindJSON error the logger is expected to log the fallowing '%v' but instead logged the message: '%v'", expectedMessage, logger.errorMessage)
 	}
 }
