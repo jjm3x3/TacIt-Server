@@ -1,6 +1,9 @@
 package db
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
+)
 
 type DbUser struct {
 	gorm.Model
@@ -21,6 +24,11 @@ type TacitDB interface {
 	Where(query interface{}, args ...interface{}) TacitDB
 	Error() error
 	RecordNotFound() bool
+}
+
+type TacitCrypt interface {
+	GenerateFromPassword(password []byte, cost int) ([]byte, error)
+	CompareHashAndPassword(hashedPassword, password []byte) error
 }
 
 type RealTacitDB struct {
@@ -59,4 +67,14 @@ func RunMigration(db TacitDB) {
 	// probably doesn't need to happen every time
 	db.AutoMigrate(&Post{})
 	db.AutoMigrate(&DbUser{})
+}
+
+func GenerateFromPassword(password []byte, cost int) ([]byte, error) {
+	hash, err := bcrypt.GenerateFromPassword(password, cost)
+	return hash, err
+}
+
+func CompareHashAndPassword(hashedPassword, password []byte) error {
+	err := bcrypt.CompareHashAndPassword(hashedPassword, password)
+	return err
 }

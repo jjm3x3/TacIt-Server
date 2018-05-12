@@ -6,10 +6,9 @@ import (
 	tacitDb "tacit-api/db"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
-func login(c httpContext, db tacitDb.TacitDB) {
+func login(c httpContext, db tacitDb.TacitDB, crypt tacitDb.TacitCrypt) {
 	var login webUser
 	err := c.bindJSON(&login)
 	if err != nil {
@@ -30,7 +29,8 @@ func login(c httpContext, db tacitDb.TacitDB) {
 	fmt.Println("Found this user from db: ", theDbUser)
 
 	pwBytes := []byte(login.Password)
-	err = bcrypt.CompareHashAndPassword([]byte(theDbUser.Password), pwBytes)
+	err = tacitDb.TacitCrypt.CompareHashAndPassword(crypt, []byte(theDbUser.Password), pwBytes)
+
 	if err != nil {
 		fmt.Println("There was something very wrong when logging in!")
 		fmt.Println("err: ", err)
@@ -41,7 +41,7 @@ func login(c httpContext, db tacitDb.TacitDB) {
 	}
 }
 
-func createUser(c httpContext, db tacitDb.TacitDB) {
+func createUser(c httpContext, db tacitDb.TacitDB, crypt tacitDb.TacitCrypt) {
 	var aUser webUser
 	err := c.bindJSON(&aUser)
 	if err != nil {
@@ -54,7 +54,7 @@ func createUser(c httpContext, db tacitDb.TacitDB) {
 	theUser := tacitDb.DbUser{Username: aUser.Username}
 
 	pwBytes := []byte(aUser.Password)
-	pwHashBytes, err := bcrypt.GenerateFromPassword(pwBytes, 10)
+	pwHashBytes, err := tacitDb.TacitCrypt.GenerateFromPassword(crypt, pwBytes, 10)
 	if err != nil {
 		fmt.Println("There was and error: ", err)
 		c.json(500, gin.H{"Error": "There was an error with creating your password"})

@@ -19,18 +19,19 @@ type webUser struct {
 }
 
 type env struct {
-	ourDB  db.TacitDB
-	logger logrus.FieldLogger
+	ourDB    db.TacitDB
+	logger   logrus.FieldLogger
+	ourCrypt db.TacitCrypt
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
 	ctx := &realHttpContext{ginCtx: c}
-	createUser(ctx, e.ourDB)
+	createUser(ctx, e.ourDB, e.ourCrypt)
 }
 
 func (e *env) doLogin(c *gin.Context) {
 	ctx := &realHttpContext{ginCtx: c}
-	login(ctx, e.ourDB)
+	login(ctx, e.ourDB, e.ourCrypt)
 }
 
 func (e *env) doCreatePost(c *gin.Context) {
