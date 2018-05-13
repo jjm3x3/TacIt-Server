@@ -4,8 +4,8 @@ import (
 	// "fmt"
 	"os"
 
-	"tacit-api/db"
 	"tacit-api/crypt"
+	"tacit-api/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -32,7 +32,7 @@ func (e *env) doCreateUser(c *gin.Context) {
 
 func (e *env) doLogin(c *gin.Context) {
 	ctx := &realHttpContext{ginCtx: c}
-	login(ctx, e.ourDB, e.ourCrypt)
+	login(ctx, e.ourDB, e.ourCrypt, e.logger)
 }
 
 func (e *env) doCreatePost(c *gin.Context) {

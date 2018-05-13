@@ -3,41 +3,41 @@ package main
 import (
 	"fmt"
 
-	tacitDb "tacit-api/db"
 	tacitCrypt "tacit-api/crypt"
+	tacitDb "tacit-api/db"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
-func login(c httpContext, db tacitDb.TacitDB, crypt tacitCrypt.TacitCrypt) {
+func login(c httpContext, db tacitDb.TacitDB, crypt tacitCrypt.TacitCrypt, logger logrus.FieldLogger) {
 	var login webUser
 	err := c.bindJSON(&login)
 	if err != nil {
-		fmt.Println("There was an error parsing login: ", err)
+		logger.Errorf("There was an error parsing login: %v", err)
 		c.json(400, gin.H{"Error": "Invalid login body"})
 		return
 	}
-	fmt.Println("Here is the user info used to login: ", login)
+	logger.Infof("User %v Logging in", login.Username)
 
 	var theDbUser tacitDb.DbUser
 	db.Where("username = ?", login.Username).First(&theDbUser)
 	if db.RecordNotFound() {
+		logger.Errorf("The user %v tried to login but is not a user", login.Username)
 		//Questionable Error return
 		c.json(401, gin.H{"Error": "User does not exist"})
 		return
 	}
 
-	fmt.Println("Found this user from db: ", theDbUser)
+	logger.Infof("Found this user from db: %v", theDbUser)
 
 	pwBytes := []byte(login.Password)
 	err = crypt.CompareHashAndPassword([]byte(theDbUser.Password), pwBytes)
 
 	if err != nil {
-		fmt.Println("There was something very wrong when logging in!")
-		fmt.Println("err: ", err)
+		logger.Errorf("Error when logging in: %v\n", err)
 		c.json(401, gin.H{"Error": "either username or password do not match"})
 	} else {
-		fmt.Println("Login successful")
 		c.json(200, gin.H{"status": "login successful"})
 	}
 }
