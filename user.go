@@ -29,7 +29,7 @@ func login(c httpContext, db tacitDb.TacitDB, crypt tacitDb.TacitCrypt) {
 	fmt.Println("Found this user from db: ", theDbUser)
 
 	pwBytes := []byte(login.Password)
-	err = tacitDb.TacitCrypt.CompareHashAndPassword(crypt, []byte(theDbUser.Password), pwBytes)
+	err = crypt.CompareHashAndPassword([]byte(theDbUser.Password), pwBytes)
 
 	if err != nil {
 		fmt.Println("There was something very wrong when logging in!")
@@ -54,7 +54,7 @@ func createUser(c httpContext, db tacitDb.TacitDB, crypt tacitDb.TacitCrypt) {
 	theUser := tacitDb.DbUser{Username: aUser.Username}
 
 	pwBytes := []byte(aUser.Password)
-	pwHashBytes, err := tacitDb.TacitCrypt.GenerateFromPassword(crypt, pwBytes, 10)
+	pwHashBytes, err := crypt.GenerateFromPassword(pwBytes, 10)
 	if err != nil {
 		fmt.Println("There was and error: ", err)
 		c.json(500, gin.H{"Error": "There was an error with creating your password"})

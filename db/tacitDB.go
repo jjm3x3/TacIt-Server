@@ -35,6 +35,9 @@ type RealTacitDB struct {
 	GormDB *gorm.DB
 }
 
+type RealTacitCrypt struct {
+}
+
 func (db *RealTacitDB) AutoMigrate(values ...interface{}) {
 	db.GormDB.AutoMigrate(values)
 }
@@ -69,12 +72,12 @@ func RunMigration(db TacitDB) {
 	db.AutoMigrate(&DbUser{})
 }
 
-func GenerateFromPassword(password []byte, cost int) ([]byte, error) {
+func (crypt *RealTacitCrypt) GenerateFromPassword(password []byte, cost int) ([]byte, error) {
 	hash, err := bcrypt.GenerateFromPassword(password, cost)
 	return hash, err
 }
 
-func CompareHashAndPassword(hashedPassword, password []byte) error {
+func (crypt *RealTacitCrypt) CompareHashAndPassword(hashedPassword, password []byte) error {
 	err := bcrypt.CompareHashAndPassword(hashedPassword, password)
 	return err
 }
