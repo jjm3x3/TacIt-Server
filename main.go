@@ -27,7 +27,7 @@ type env struct {
 
 func (e *env) doCreateUser(c *gin.Context) {
 	ctx := &realHttpContext{ginCtx: c}
-	createUser(ctx, e.ourDB, e.ourCrypt)
+	createUser(ctx, e.ourDB, e.ourCrypt, e.logger)
 }
 
 func (e *env) doLogin(c *gin.Context) {

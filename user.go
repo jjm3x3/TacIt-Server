@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	tacitCrypt "tacit-api/crypt"
 	tacitDb "tacit-api/db"
 
@@ -42,34 +40,34 @@ func login(c httpContext, db tacitDb.TacitDB, crypt tacitCrypt.TacitCrypt, logge
 	}
 }
 
-func createUser(c httpContext, db tacitDb.TacitDB, crypt tacitCrypt.TacitCrypt) {
+func createUser(c httpContext, db tacitDb.TacitDB, crypt tacitCrypt.TacitCrypt, logger logrus.FieldLogger) {
 	var aUser webUser
 	err := c.bindJSON(&aUser)
 	if err != nil {
-		fmt.Println("There was an error parsing User: ", err)
+		logger.Errorf("There was an error parsing login: %v", err)
 		c.json(400, gin.H{"Error": "Invalid create user body"})
 		return
 	}
-	fmt.Println("Here is the user to create: ", aUser)
+	logger.Infof("User %v being created", aUser.Username)
 
 	theUser := tacitDb.DbUser{Username: aUser.Username}
 
 	pwBytes := []byte(aUser.Password)
 	pwHashBytes, err := crypt.GenerateFromPassword(pwBytes, 10)
 	if err != nil {
-		fmt.Println("There was and error: ", err)
+		logger.Errorf("There was and error createing password: %v", err)
 		c.json(500, gin.H{"Error": "There was an error with creating your password"})
 		return
 	}
 	theUser.Password = string(pwHashBytes)
 
-	fmt.Println("Here is the user That will be created: ", theUser)
-
 	err = db.Create(&theUser).Error()
 	if err != nil {
-		fmt.Println("There was an issue creating user: ", err)
+		logger.Errorf("There was an issue creating user: %v", err)
 		c.json(500, gin.H{"Error": "There was an error with creating your user"})
 		return
 	}
+	logger.Infof("User %v created", aUser.Username)
+
 	c.json(200, gin.H{"status": "success"})
 }
