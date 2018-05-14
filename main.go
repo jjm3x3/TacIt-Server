@@ -74,7 +74,7 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
-	anEnv := &env{ourDB: aRealTacitDB, logger: aLogger}
+	anEnv := &env{ourDB: aRealTacitDB, logger: aLogger, ourCrypt: &db.RealTacitCrypt{}}
 
 	r.POST("/user", anEnv.doCreateUser)
 
