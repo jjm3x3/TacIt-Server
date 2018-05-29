@@ -1,3 +1,7 @@
 script: 
   - pwd
   - ls
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - dep ensure
+  - chmod +x ./scripts/runTest.sh
+  - ./scripts/runTest.sh
