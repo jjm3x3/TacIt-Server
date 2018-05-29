@@ -1,6 +1,9 @@
 script: 
   - pwd
   - ls
+  - echo $GOPATH
+  - mkdir -p go/src/
+  - cp -r * go/src
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   - dep ensure
   - chmod +x ./scripts/runTest.sh
