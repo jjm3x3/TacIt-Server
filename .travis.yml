@@ -2,9 +2,10 @@ script:
   - pwd
   - ls
   - echo $GOPATH
-  - mkdir -p ../gopath/src/tacit-api
-  - cp -r * ../gopath/src/tacit-api
+  - mkdir -p ../../../gopath/src/tacit-api
+  - cp -r * ../../../gopath/src/tacit-api
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - cd ../../../gopath/src/tacit-api
   - dep ensure
   - chmod +x ./scripts/runTest.sh
   - ./scripts/runTest.sh
