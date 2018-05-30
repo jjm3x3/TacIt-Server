@@ -1,6 +1,8 @@
 package db
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+)
 
 type DbUser struct {
 	gorm.Model
@@ -23,9 +25,13 @@ type TacitDB interface {
 	RecordNotFound() bool
 }
 
+
+
 type RealTacitDB struct {
 	GormDB *gorm.DB
 }
+
+
 
 func (db *RealTacitDB) AutoMigrate(values ...interface{}) {
 	db.GormDB.AutoMigrate(values)
@@ -60,3 +66,4 @@ func RunMigration(db TacitDB) {
 	db.AutoMigrate(&Post{})
 	db.AutoMigrate(&DbUser{})
 }
+

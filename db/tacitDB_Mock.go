@@ -20,6 +20,7 @@ type TacitDBMock struct {
 	NoRecordFound     bool
 }
 
+
 func (db *TacitDBMock) AutoMigrate(values ...interface{}) {
 	db.TimesAutoMigrateWasCalled++
 }

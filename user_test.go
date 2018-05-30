@@ -1,8 +1,11 @@
 package main
 
 import (
-	tacitDb "tacit-api/db"
+	tacitDb "tacit-api/db" 
+	tacitCrypt "tacit-api/crypt"
+	
 	"testing"
+
 )
 
 func TestLoginReadsBody(t *testing.T) {
@@ -22,7 +25,9 @@ func TestLoginReadsBody(t *testing.T) {
 		FirstResultDBUser: aDBUser,
 	}
 
-	login(c, db)
+	crypt := &tacitCrypt.TacitCryptMock{}
+
+	login(c, db, crypt)
 
 	if !c.bindJSONIsCalled {
 		t.Error("bindJSON is never called and should be called at least once.")
@@ -50,8 +55,9 @@ func TestLoginHappyPath(t *testing.T) {
 		FirstResultDBUser: aDBUser,
 		NoRecordFound:     false,
 	}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db)
+	login(c, db, crypt)
 
 	if c.jsonCode != 200 {
 		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
@@ -79,8 +85,9 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 	db := &tacitDb.TacitDBMock{
 		FirstResultDBUser: aDBUser,
 	}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db)
+	login(c, db, crypt)
 	if c.jsonCode != 401 {
 		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.jsonCode)
 	}
@@ -110,8 +117,9 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 	db := &tacitDb.TacitDBMock{
 		FirstResultDBUser: aDBUser,
 	}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db)
+	login(c, db, crypt)
 	if c.jsonCode != 401 {
 		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.jsonCode)
 	}
@@ -132,7 +140,9 @@ func TestLoginBindError(t *testing.T) {
 		FirstResultDBUser: aDBUser,
 	}
 
-	login(c, db)
+	crypt := &tacitCrypt.TacitCryptMock{}
+
+	login(c, db, crypt)
 	if c.jsonCode != 400 {
 		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.jsonCode)
 	}
@@ -163,7 +173,9 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 		NoRecordFound:     true,
 	}
 
-	login(c, db)
+	crypt := &tacitCrypt.TacitCryptMock{}
+
+	login(c, db, crypt)
 
 	if c.jsonCode != 401 {
 		t.Errorf("The expected http status code is 401 for this path. The current status code was %v", c.jsonCode)
@@ -185,7 +197,9 @@ func TestCreateUserReadsBody(t *testing.T) {
 
 	db := &tacitDb.TacitDBMock{}
 
-	createUser(c, db)
+	crypt := &tacitCrypt.TacitCryptMock{}
+
+	createUser(c, db, crypt)
 
 	if !c.bindJSONIsCalled {
 		t.Error("bindJSON is never called and should be called at least once.")
@@ -209,7 +223,9 @@ func TestCreateUserHappyPath(t *testing.T) {
 		NoRecordFound: true,
 	}
 
-	createUser(c, db)
+	crypt := &tacitCrypt.TacitCryptMock{}
+
+	createUser(c, db, crypt)
 
 	if c.jsonCode != 200 {
 		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
@@ -231,7 +247,9 @@ func TestCreateUserBindError(t *testing.T) {
 		FirstResultDBUser: aDBUser,
 	}
 
-	createUser(c, db)
+	crypt := &tacitCrypt.TacitCryptMock{}
+
+	createUser(c, db, crypt)
 	if c.jsonCode != 400 {
 		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.jsonCode)
 	}
@@ -252,11 +270,15 @@ func TestCreateUserSavesUser(t *testing.T) {
 	}
 	db := &tacitDb.TacitDBMock{
 		TimesCreateWasCalled: 0,
-		NoRecordFound:        true}
+		NoRecordFound:        true,
+	}
+
+	crypt := &tacitCrypt.TacitCryptMock{}
+
 	expectedDbCreates := 1
 
 	//execution
-	createUser(c, db)
+	createUser(c, db, crypt)
 
 	//assertions
 	if db.TimesCreateWasCalled != expectedDbCreates {
@@ -275,7 +297,9 @@ func TestCreateUserPasswordStoredProperly(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDb.TacitDBMock{}
-	createUser(c, db)
+	crypt := &tacitCrypt.TacitCryptMock{}
+
+	createUser(c, db, crypt)
 	if aWebUser.Password == db.StoredPassword {
 		t.Errorf("Password stored in plain text.")
 	}
@@ -294,10 +318,33 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 		HasError:      true,
 		NoRecordFound: true,
 	}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
-	createUser(c, db)
+	createUser(c, db, crypt)
 	if c.jsonCode != 500 {
 		t.Errorf("The expected http status code is 500 for user database creation error. The current status code was %v", c.jsonCode)
+	}
+	if c.timesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	}
+
+}
+
+func TestCreateUserGeneratePasswordError(t *testing.T) {
+	aWebUser := &webUser{
+		Username: "Username",
+		Password: "Password",
+	}
+	c := &httpContextMock{
+		bindJSONResultWebUser: aWebUser,
+	}
+	db := &tacitDb.TacitDBMock{}
+	crypt := &tacitCrypt.TacitCryptMock{
+		HasGeneratePasswordError: true,
+	}
+	createUser(c, db, crypt)
+	if c.jsonCode != 500 {
+		t.Errorf("The expected http status code is 500 for user database createion error. The current status code was %v", c.jsonCode)
 	}
 	if c.timesJSONisCalled != 1 {
 		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
