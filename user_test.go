@@ -1,8 +1,11 @@
 package main
 
 import (
-	tacitDb "tacit-api/db"
+	tacitDb "tacit-api/db" 
+	tacitCrypt "tacit-api/crypt"
+	
 	"testing"
+
 )
 
 func TestLoginReadsBody(t *testing.T) {
@@ -22,7 +25,7 @@ func TestLoginReadsBody(t *testing.T) {
 		FirstResultDBUser: aDBUser,
 	}
 
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	login(c, db, crypt)
 
@@ -52,7 +55,7 @@ func TestLoginHappyPath(t *testing.T) {
 		FirstResultDBUser: aDBUser,
 		NoRecordFound:     false,
 	}
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	login(c, db, crypt)
 
@@ -82,7 +85,7 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 	db := &tacitDb.TacitDBMock{
 		FirstResultDBUser: aDBUser,
 	}
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	login(c, db, crypt)
 	if c.jsonCode != 401 {
@@ -114,7 +117,7 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 	db := &tacitDb.TacitDBMock{
 		FirstResultDBUser: aDBUser,
 	}
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	login(c, db, crypt)
 	if c.jsonCode != 401 {
@@ -137,7 +140,7 @@ func TestLoginBindError(t *testing.T) {
 		FirstResultDBUser: aDBUser,
 	}
 
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	login(c, db, crypt)
 	if c.jsonCode != 400 {
@@ -170,7 +173,7 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 		NoRecordFound:     true,
 	}
 
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	login(c, db, crypt)
 
@@ -194,7 +197,7 @@ func TestCreateUserReadsBody(t *testing.T) {
 
 	db := &tacitDb.TacitDBMock{}
 
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	createUser(c, db, crypt)
 
@@ -220,7 +223,7 @@ func TestCreateUserHappyPath(t *testing.T) {
 		NoRecordFound: true,
 	}
 
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	createUser(c, db, crypt)
 
@@ -244,7 +247,7 @@ func TestCreateUserBindError(t *testing.T) {
 		FirstResultDBUser: aDBUser,
 	}
 
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	createUser(c, db, crypt)
 	if c.jsonCode != 400 {
@@ -270,7 +273,7 @@ func TestCreateUserSavesUser(t *testing.T) {
 		NoRecordFound:        true,
 	}
 
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	expectedDbCreates := 1
 
@@ -294,7 +297,7 @@ func TestCreateUserPasswordStoredProperly(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDb.TacitDBMock{}
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	createUser(c, db, crypt)
 	if aWebUser.Password == db.StoredPassword {
@@ -315,7 +318,7 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 		HasError:      true,
 		NoRecordFound: true,
 	}
-	crypt := &tacitDb.TacitCryptMock{}
+	crypt := &tacitCrypt.TacitCryptMock{}
 
 	createUser(c, db, crypt)
 	if c.jsonCode != 500 {
@@ -336,7 +339,7 @@ func TestCreateUserGeneratePasswordError(t *testing.T) {
 		bindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDb.TacitDBMock{}
-	crypt := &tacitDb.TacitCryptMock{
+	crypt := &tacitCrypt.TacitCryptMock{
 		HasGeneratePasswordError: true,
 	}
 	createUser(c, db, crypt)

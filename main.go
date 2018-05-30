@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"tacit-api/db"
+	"tacit-api/crypt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -21,7 +22,7 @@ type webUser struct {
 type env struct {
 	ourDB    db.TacitDB
 	logger   logrus.FieldLogger
-	ourCrypt db.TacitCrypt
+	ourCrypt crypt.TacitCrypt
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
@@ -74,7 +75,7 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
-	anEnv := &env{ourDB: aRealTacitDB, logger: aLogger, ourCrypt: &db.RealTacitCrypt{}}
+	anEnv := &env{ourDB: aRealTacitDB, logger: aLogger, ourCrypt: &crypt.RealTacitCrypt{}}
 
 	r.POST("/user", anEnv.doCreateUser)
 
