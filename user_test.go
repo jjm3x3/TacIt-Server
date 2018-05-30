@@ -1,14 +1,21 @@
 package main
 
 import (
-	tacitDb "tacit-api/db" 
 	tacitCrypt "tacit-api/crypt"
-	
+	tacitDb "tacit-api/db"
+
 	"testing"
 
+	"tacit-api/mocks"
+
+	"github.com/golang/mock/gomock"
 )
 
 func TestLoginReadsBody(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -27,7 +34,11 @@ func TestLoginReadsBody(t *testing.T) {
 
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v Logging in", gomock.Any())
+	mockLogger.EXPECT().Infof("Found this user from db: %v", gomock.Any())
+	mockLogger.EXPECT().Errorf("Error when logging in: %v\n", gomock.Any())
+
+	login(c, db, crypt, mockLogger)
 
 	if !c.bindJSONIsCalled {
 		t.Error("bindJSON is never called and should be called at least once.")
@@ -35,6 +46,10 @@ func TestLoginReadsBody(t *testing.T) {
 
 }
 func TestLoginHappyPath(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -57,7 +72,10 @@ func TestLoginHappyPath(t *testing.T) {
 	}
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v Logging in", gomock.Any())
+	mockLogger.EXPECT().Infof("Found this user from db: %v", gomock.Any())
+
+	login(c, db, crypt, mockLogger)
 
 	if c.jsonCode != 200 {
 		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
@@ -68,6 +86,9 @@ func TestLoginHappyPath(t *testing.T) {
 }
 
 func TestLoginWrongUsernameRightPassword(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
 	aWebUser := &webUser{
 		Username: "Usernam",
@@ -87,7 +108,11 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 	}
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v Logging in", gomock.Any())
+	mockLogger.EXPECT().Infof("Found this user from db: %v", gomock.Any())
+	mockLogger.EXPECT().Errorf("Error when logging in: %v\n", gomock.Any())
+
+	login(c, db, crypt, mockLogger)
 	if c.jsonCode != 401 {
 		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.jsonCode)
 	}
@@ -97,6 +122,9 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 }
 
 func TestLoginRightUsernameWrongPassword(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
 	aWebUser := &webUser{
 		Username: "Username",
@@ -119,7 +147,12 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 	}
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v Logging in", gomock.Any())
+	mockLogger.EXPECT().Infof("Found this user from db: %v", gomock.Any())
+	mockLogger.EXPECT().Errorf("Error when logging in: %v\n", gomock.Any())
+
+	login(c, db, crypt, mockLogger)
+
 	if c.jsonCode != 401 {
 		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.jsonCode)
 	}
@@ -129,6 +162,10 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 }
 
 func TestLoginBindError(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	c := &httpContextMock{
 		jsonCode:          0,
 		timesJSONisCalled: 0,
@@ -142,7 +179,10 @@ func TestLoginBindError(t *testing.T) {
 
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db, crypt)
+	mockLogger.EXPECT().Errorf("There was an error parsing login: %v", gomock.Any())
+
+	login(c, db, crypt, mockLogger)
+
 	if c.jsonCode != 400 {
 		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.jsonCode)
 	}
@@ -152,6 +192,10 @@ func TestLoginBindError(t *testing.T) {
 
 }
 func TestLoginUserDoesNotExistError(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -175,7 +219,10 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	login(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v Logging in", gomock.Any())
+	mockLogger.EXPECT().Errorf("The user %v tried to login but is not a user", gomock.Any())
+
+	login(c, db, crypt, mockLogger)
 
 	if c.jsonCode != 401 {
 		t.Errorf("The expected http status code is 401 for this path. The current status code was %v", c.jsonCode)
@@ -185,6 +232,10 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 	}
 }
 func TestCreateUserReadsBody(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -199,7 +250,10 @@ func TestCreateUserReadsBody(t *testing.T) {
 
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	createUser(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v being created", gomock.Any())
+	mockLogger.EXPECT().Infof("User %v created", gomock.Any())
+
+	createUser(c, db, crypt, mockLogger)
 
 	if !c.bindJSONIsCalled {
 		t.Error("bindJSON is never called and should be called at least once.")
@@ -208,6 +262,10 @@ func TestCreateUserReadsBody(t *testing.T) {
 }
 
 func TestCreateUserHappyPath(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -225,7 +283,10 @@ func TestCreateUserHappyPath(t *testing.T) {
 
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	createUser(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v being created", gomock.Any())
+	mockLogger.EXPECT().Infof("User %v created", gomock.Any())
+
+	createUser(c, db, crypt, mockLogger)
 
 	if c.jsonCode != 200 {
 		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
@@ -236,6 +297,10 @@ func TestCreateUserHappyPath(t *testing.T) {
 }
 
 func TestCreateUserBindError(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	c := &httpContextMock{
 		jsonCode:          0,
 		timesJSONisCalled: 0,
@@ -249,7 +314,9 @@ func TestCreateUserBindError(t *testing.T) {
 
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	createUser(c, db, crypt)
+	mockLogger.EXPECT().Errorf("There was an error parsing login: %v", gomock.Any())
+
+	createUser(c, db, crypt, mockLogger)
 	if c.jsonCode != 400 {
 		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.jsonCode)
 	}
@@ -260,6 +327,10 @@ func TestCreateUserBindError(t *testing.T) {
 }
 
 func TestCreateUserSavesUser(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -277,8 +348,11 @@ func TestCreateUserSavesUser(t *testing.T) {
 
 	expectedDbCreates := 1
 
+	mockLogger.EXPECT().Infof("User %v being created", gomock.Any())
+	mockLogger.EXPECT().Infof("User %v created", gomock.Any())
+
 	//execution
-	createUser(c, db, crypt)
+	createUser(c, db, crypt, mockLogger)
 
 	//assertions
 	if db.TimesCreateWasCalled != expectedDbCreates {
@@ -288,6 +362,10 @@ func TestCreateUserSavesUser(t *testing.T) {
 }
 
 func TestCreateUserPasswordStoredProperly(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -299,13 +377,20 @@ func TestCreateUserPasswordStoredProperly(t *testing.T) {
 	db := &tacitDb.TacitDBMock{}
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	createUser(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v being created", gomock.Any())
+	mockLogger.EXPECT().Infof("User %v created", gomock.Any())
+
+	createUser(c, db, crypt, mockLogger)
 	if aWebUser.Password == db.StoredPassword {
 		t.Errorf("Password stored in plain text.")
 	}
 }
 
 func TestCreateUserDatabaseCreationError(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -320,7 +405,10 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 	}
 	crypt := &tacitCrypt.TacitCryptMock{}
 
-	createUser(c, db, crypt)
+	mockLogger.EXPECT().Infof("User %v being created", gomock.Any())
+	mockLogger.EXPECT().Errorf("There was an issue creating user: %v", gomock.Any())
+
+	createUser(c, db, crypt, mockLogger)
 	if c.jsonCode != 500 {
 		t.Errorf("The expected http status code is 500 for user database creation error. The current status code was %v", c.jsonCode)
 	}
@@ -331,6 +419,10 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 }
 
 func TestCreateUserGeneratePasswordError(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
 	aWebUser := &webUser{
 		Username: "Username",
 		Password: "Password",
@@ -342,7 +434,12 @@ func TestCreateUserGeneratePasswordError(t *testing.T) {
 	crypt := &tacitCrypt.TacitCryptMock{
 		HasGeneratePasswordError: true,
 	}
-	createUser(c, db, crypt)
+
+	mockLogger.EXPECT().Infof("User %v being created", gomock.Any())
+	mockLogger.EXPECT().Errorf("There was and error createing password: %v", gomock.Any())
+
+	createUser(c, db, crypt, mockLogger)
+
 	if c.jsonCode != 500 {
 		t.Errorf("The expected http status code is 500 for user database createion error. The current status code was %v", c.jsonCode)
 	}
