@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	tacitDb "tacit-api/db"
+	tacitCrypt "tacit-api/crypt"
 
 	"github.com/gin-gonic/gin"
 )
 
-func login(c httpContext, db tacitDb.TacitDB, crypt tacitDb.TacitCrypt) {
+func login(c httpContext, db tacitDb.TacitDB, crypt tacitCrypt.TacitCrypt) {
 	var login webUser
 	err := c.bindJSON(&login)
 	if err != nil {
@@ -41,7 +42,7 @@ func login(c httpContext, db tacitDb.TacitDB, crypt tacitDb.TacitCrypt) {
 	}
 }
 
-func createUser(c httpContext, db tacitDb.TacitDB, crypt tacitDb.TacitCrypt) {
+func createUser(c httpContext, db tacitDb.TacitDB, crypt tacitCrypt.TacitCrypt) {
 	var aUser webUser
 	err := c.bindJSON(&aUser)
 	if err != nil {
