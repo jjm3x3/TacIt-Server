@@ -19,9 +19,9 @@ func (ctx *realHttpContext) bindJSON(obj interface{}) error {
 }
 
 func (ctx *realHttpContext) readBody(outbytes []byte) (int, error) {
-	return ctx.ginCtx.ReadBody(outbytes)
+	return ctx.ginCtx.Request.Body.Read(outbytes)
 }
 
 func (ctx *realHttpContext) json(code int, jsonResponse map[string]interface{}) {
-	return ctx.ginCtx.JSON(code, jsonResponse)
+	ctx.ginCtx.JSON(code, jsonResponse)
 }
