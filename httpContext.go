@@ -15,13 +15,13 @@ type realHttpContext struct {
 }
 
 func (ctx *realHttpContext) bindJSON(obj interface{}) error {
-	panic("method not implemented")
+	return ctx.ginCtx.bindJSON(obj)
 }
 
-func (ctx *realHttpContext) readBody([]byte) (int, error) {
-	panic("method not implemented")
+func (ctx *realHttpContext) readBody(outbytes []byte) (int, error) {
+	return ctx.ginCtx.readBoxy(outbytes)
 }
 
-func (ctx *realHttpContext) json(int, map[string]interface{}) {
-	panic("method not implemented")
+func (ctx *realHttpContext) json(code int, jsonResponse map[string]interface{}) {
+	return ctx.ginCtx.JSON(code, jsonResponse)
 }
