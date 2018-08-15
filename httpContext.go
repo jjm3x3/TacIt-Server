@@ -15,11 +15,11 @@ type realHttpContext struct {
 }
 
 func (ctx *realHttpContext) bindJSON(obj interface{}) error {
-	return ctx.ginCtx.bindJSON(obj)
+	return ctx.ginCtx.BindJSON(obj)
 }
 
 func (ctx *realHttpContext) readBody(outbytes []byte) (int, error) {
-	return ctx.ginCtx.readBoxy(outbytes)
+	return ctx.ginCtx.ReadBody(outbytes)
 }
 
 func (ctx *realHttpContext) json(code int, jsonResponse map[string]interface{}) {
