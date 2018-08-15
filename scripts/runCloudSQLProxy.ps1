@@ -1,0 +1,1 @@
+docker run -d -v /cloudsql:/cloudsql -v D:\Users\jmeixner\Code\goCode\src\tacit-api\config\tacit-db67b0097365.json:/config -p 33306:3306 gcr.io/cloudsql-docker/gce-proxy:1.11 /cloud_sql_proxy -instances=tacit-196502:us-central1:tacit-dev=tcp:0.0.0.0:3306 -credential_file=/config
