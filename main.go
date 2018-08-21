@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"os"
+	"time"
 
 	"tacit-api/crypt"
 	"tacit-api/db"
@@ -57,7 +59,14 @@ func main() {
 
 	connectionString := dbUser + ":" + dbPassword + "@tcp(127.0.0.1:3306)/" + defaultDb + "?charset=utf8&parseTime=True&loc=Local"
 	// connectionString := "host="+defaultHost+" port="+defaultPort+" user="+defaultUser+" dbname="+defaultDb+" sslmode=disable"
-	dbHandle, err := gorm.Open("mysql", connectionString) // TODO:: enable ssl
+	var (
+		dbHandle *gorm.DB
+		err      error = errors.New("not yet executed")
+	)
+	for err != nil {
+		dbHandle, err = gorm.Open("mysql", connectionString) // TODO:: enable ssl
+		time.Sleep(time.Second)
+	}
 	defer dbHandle.Close()
 
 	if err != nil {
