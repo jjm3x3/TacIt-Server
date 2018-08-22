@@ -63,6 +63,7 @@ func main() {
 		dbHandle *gorm.DB
 		err      error = errors.New("not yet executed")
 	)
+	// go for until this doesn't error to wait for cloudsql-proxy
 	for err != nil {
 		dbHandle, err = gorm.Open("mysql", connectionString) // TODO:: enable ssl
 		time.Sleep(time.Second)
