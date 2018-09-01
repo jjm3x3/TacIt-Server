@@ -51,6 +51,8 @@ build:
     - kubectl config set-context cluster-1 --cluster=cluster-1 --user=gitlab
     - kubectl config use-context  cluster-1
     - kubectl config view
+    - cat ~/.kube/config
+    - cat /etc/kubernetes/admin.conf
     - kubectl get pods
     - export DOCKER_FRIENDLY_REF_NAME=$(echo $CI_COMMIT_REF_NAME | sed "s/\//_/g")
     - sed "s/{{TAG}}/$DOCKER_FRIENDLY_REF_NAME/g" kube/deployment.yaml > kube/finalDeployment.yaml
