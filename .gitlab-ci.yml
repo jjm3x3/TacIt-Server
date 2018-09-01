@@ -35,6 +35,7 @@ build:
 .deploy_template: &deploy_dev
   stage: deploy
   script:
+    - echo $GITLAB_KEY_PEM > /opt/cert/gitlab-key.pem
     - kubectl config set-credentials gitlab --client-certificate=/opt/cert/gitlab.pem --client-key=/opt/cert/gitlab-key.pem
     - kubectl config set-context cluster-1 --cluster=cluster-1 --user=gitlab
     - kubectl config use-context  cluster-1
