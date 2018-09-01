@@ -36,15 +36,17 @@ build:
   stage: deploy
   script:
     - export keytemp=$(mktemp)
+    - export keytemp2=$(mktemp)
     - echo $GITLAB_KEY_PEM | sed 's/-*[A-Z ]*-*- *//g' > $keytemp
     - cat $keytemp
-    - cat $keytemp | sed 's/ /\n/g' > $keytemp 
-    - cat $keytemp
+    - cat $keytemp | sed 's/ /\n/g' > $keytemp2
+    - cat $keytemp2
     - echo "-----BEGIN RSA PRIVATE KEY-----" > /opt/cert/gitlab-key.pem
-    - cat $keytemp >> /opt/cert/gitlab-key.pem
+    - cat $keytemp2 >> /opt/cert/gitlab-key.pem
     - echo "-----END RSA PRIVATE KEY-----" >> /opt/cert/gitlab-key.pem
     - cat /opt/cert/gitlab-key.pem
     - rm $keytemp
+    - rm $keytemp2
     - kubectl config set-credentials gitlab --client-certificate=/opt/cert/gitlab.pem --client-key=/opt/cert/gitlab-key.pem
     - kubectl config set-context cluster-1 --cluster=cluster-1 --user=gitlab
     - kubectl config use-context  cluster-1
