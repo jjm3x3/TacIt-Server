@@ -1,5 +1,5 @@
 image:
-  name: "us.gcr.io/tacit-196502/go-build:master"
+  name: "us.gcr.io/tacit-196502/go-build:feature_auth-cluster1"
   
 stages: 
   - testing
