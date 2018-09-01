@@ -35,14 +35,13 @@ build:
 .deploy_template: &deploy_dev
   stage: deploy
   script:
-    - export jkey=$(mktemp)
-    - echo "$DOCKER_PASSWORD" > $jkey
-    - gcloud auth activate-service-account --key-file=$jkey
-    - gcloud container clusters get-credentials tacit-dev --zone us-central1-a --project tacit-196502
+    - kubectl config set-credentials gitlab --client-certificate=/opt/cert/gitlab.pem --client-key=/opt/cert/gitlab-key.pem
+    - kubectl config set-context cluster-1 --cluster=cluster-1 --user=gitlab
+    - kubectl config use-context  cluster-1
+    - kubectl get pods
     - export DOCKER_FRIENDLY_REF_NAME=$(echo $CI_COMMIT_REF_NAME | sed "s/\//_/g")
     - sed "s/{{TAG}}/$DOCKER_FRIENDLY_REF_NAME/g" kube/deployment.yaml > kube/finalDeployment.yaml
     - kubectl apply -f ./kube/finalDeployment.yaml
-    - rm $jkey
     
 deploy_feature: 
     <<: *deploy_dev
