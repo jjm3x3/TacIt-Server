@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	// "fmt"
 	"fmt"
 	"os"
+	"net/http"
+	"io/ioutil"
 
 	"tacit-api/crypt"
 	"tacit-api/db"
@@ -13,6 +16,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sirupsen/logrus"
+	"github.com/dgrijalva/jwt-go"
 )
 
 type webUser struct {
@@ -79,7 +83,7 @@ func main() {
 		GormDB: dbHandle,
 	}
 
-	// db.RunMigration(aRealTacitDB)
+	db.RunMigration(aRealTacitDB)
 
 	r := gin.Default()
 
@@ -111,11 +115,26 @@ func FUCKITIWRITEMYOWN() gin.HandlerFunc {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 
+			resp, err := http.Get("https://tacit.auth0.com/.well-known/jwks.json")
+			if err != nil {
+				fmt.Printf("Our public key is unavailable becase: %v\n", err)
+			}
+			defer resp.Body.Close()
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println("Error readying auth0keys response: ", err)
+			}
+
+			var keys Auth0PublicKeys
+			err = json.Unmarshal(body, &keys)
+			if err != nil {
+				fmt.Println("Error unmarsaling auth0keys", err)
+			}
 			// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-			return "", nil
+			return keys.Keys[0].X5c[0], nil
 		})
 		if err != nil {
-			fmt.Println("There was an issue parsing the JWT")
+			fmt.Println("There was an issue parsing the JWT: ", err)
 		}
 		// Don't forget to validate the alg is what you expect:
 		// token, err := jwt.ParseWithClaims(tokenString, &CustomClaimsExample{}, func(token *jwt.Token) (interface{}, error) {
@@ -124,6 +143,18 @@ func FUCKITIWRITEMYOWN() gin.HandlerFunc {
 		// 	return verifyKey, nil
 		// })
 		c.Set("thing", tokenString)
-		fmt.Printf("IN A MIDDLEWARE BITCH with: '%v'\n", tokenString)
+		fmt.Printf("IN A MIDDLEWARE BITCH with: '%v'\n", token)
 	}
+}
+
+type Auth0PublicKeys struct {
+	Keys []Auth0Key
+}
+
+type Auth0Key struct  {
+	Alg string
+	Kty string
+	Use string
+	X5c []string
+	// some more things IDC about 
 }
