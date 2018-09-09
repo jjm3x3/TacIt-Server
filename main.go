@@ -59,8 +59,12 @@ func main() {
 	if len(dbPassword) == 0 {
 		dbPassword = "@"
 	}
+	dbPort := os.Getenv("DB_PORT")
+	if len(dbPort) == 0 {
+		dbPort = "3306"
+	}
 
-	connectionString := dbUser + ":" + dbPassword + "@tcp(127.0.0.1:3306)/" + defaultDb + "?charset=utf8&parseTime=True&loc=Local"
+	connectionString := dbUser + ":" + dbPassword + "@tcp(127.0.0.1:" + dbPort +")/" + defaultDb + "?charset=utf8&parseTime=True&loc=Local"
 	// connectionString := "host="+defaultHost+" port="+defaultPort+" user="+defaultUser+" dbname="+defaultDb+" sslmode=disable"
 	dbHandle, err := gorm.Open("mysql", connectionString) // TODO:: enable ssl
 	defer dbHandle.Close()
