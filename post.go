@@ -25,3 +25,14 @@ func createPost(c httpContext, db tacitDB.TacitDB, logger logrus.FieldLogger) {
 	db.Create(&aPost)
 	c.json(200, gin.H{"status": "success"})
 }
+
+func listPosts(c httpContext, db tacitDB.TacitDB, logger logrus.FieldLogger) {
+	var somePosts []tacitDB.Post
+	err := db.Table("posts").Find(&somePosts).Error()
+
+	if err != nil {
+		logger.Error("An error has occured fetching posts: ", err)
+	}
+
+	c.json(200, gin.H{"posts": somePosts})
+}

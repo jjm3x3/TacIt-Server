@@ -40,6 +40,11 @@ func (e *env) doCreatePost(c *gin.Context) {
 	createPost(ctx, e.ourDB, e.logger)
 }
 
+func (e *env) doListPosts(c *gin.Context) {
+	ctx := &realHttpContext{ginCtx: c}
+	listPosts(ctx, e.ourDB, e.logger)
+}
+
 func main() {
 	aLogger := logrus.New()
 	aLogger.Info("Tacit-api has started")
@@ -82,6 +87,8 @@ func main() {
 	r.POST("/login", anEnv.doLogin)
 
 	r.POST("/note", anEnv.doCreatePost)
+
+	r.GET("/note", anEnv.doListPosts)
 
 	r.Run()
 }

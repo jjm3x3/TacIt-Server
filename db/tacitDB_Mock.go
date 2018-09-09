@@ -20,7 +20,6 @@ type TacitDBMock struct {
 	NoRecordFound     bool
 }
 
-
 func (db *TacitDBMock) AutoMigrate(values ...interface{}) {
 	db.TimesAutoMigrateWasCalled++
 }
@@ -58,6 +57,14 @@ func (db *TacitDBMock) Error() error {
 		return fmt.Errorf("___GENERIC_DATABASE_ERROR___")
 	}
 	return nil
+}
+
+func (db *TacitDBMock) Find(out interface{}) TacitDB {
+	return db
+}
+
+func (db *TacitDBMock) Table(name string) TacitDB {
+	return db
 }
 
 //Mocks gorm NoRecordFound
