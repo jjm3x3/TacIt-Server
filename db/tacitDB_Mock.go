@@ -12,6 +12,8 @@ type TacitDBMock struct {
 	TimesCreateWasCalled      int
 	TimesWhereWasCalled       int
 	TimesFirstWasCalled       int
+	TimesFindWasCalled        int
+	TableSearched             string
 	StoredPassword            string
 
 	//Behavioral Setup
@@ -60,10 +62,12 @@ func (db *TacitDBMock) Error() error {
 }
 
 func (db *TacitDBMock) Find(out interface{}) TacitDB {
+	db.TimesFindWasCalled++
 	return db
 }
 
 func (db *TacitDBMock) Table(name string) TacitDB {
+	db.TableSearched = name
 	return db
 }
 
