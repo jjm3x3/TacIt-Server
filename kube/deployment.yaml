@@ -15,6 +15,7 @@ spec:
       containers:
       - name: api
         image: us.gcr.io/tacit-196502/api:{{TAG}}
+        imagePullPolicy: Always
         env:
           - name: DB_USER
             valueFrom:

@@ -38,7 +38,7 @@ build:
     - export jkey=$(mktemp)
     - echo "$DOCKER_PASSWORD" > $jkey
     - gcloud auth activate-service-account --key-file=$jkey
-    - gcloud container clusters get-credentials tacit-dev --zone us-central1-a --project tacit-196502
+    - gcloud container clusters get-credentials non-prod --zone us-central1-a --project tacit-196502
     - export DOCKER_FRIENDLY_REF_NAME=$(echo $CI_COMMIT_REF_NAME | sed "s/\//_/g")
     - sed "s/{{TAG}}/$DOCKER_FRIENDLY_REF_NAME/g" kube/deployment.yaml > kube/finalDeployment.yaml
     - kubectl apply -f ./kube/finalDeployment.yaml
