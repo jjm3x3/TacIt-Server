@@ -1,12 +1,15 @@
 package main
 
 import (
+	"math/big"
 	"encoding/json"
 	// "fmt"
 	"fmt"
 	"os"
 	"net/http"
 	"io/ioutil"
+	"crypto/rsa"
+	"encoding/base64"
 
 	"tacit-api/crypt"
 	"tacit-api/db"
@@ -83,7 +86,7 @@ func main() {
 		GormDB: dbHandle,
 	}
 
-	db.RunMigration(aRealTacitDB)
+	// db.RunMigration(aRealTacitDB)
 
 	r := gin.Default()
 
@@ -115,6 +118,7 @@ func FUCKITIWRITEMYOWN() gin.HandlerFunc {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 
+			fmt.Println("what is the kid of the token: ", token.Header["kid"])
 			resp, err := http.Get("https://tacit.auth0.com/.well-known/jwks.json")
 			if err != nil {
 				fmt.Printf("Our public key is unavailable becase: %v\n", err)
@@ -130,11 +134,38 @@ func FUCKITIWRITEMYOWN() gin.HandlerFunc {
 			if err != nil {
 				fmt.Println("Error unmarsaling auth0keys", err)
 			}
-			// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-			return keys.Keys[0].X5c[0], nil
+			if token.Header["kid"] == keys.Keys[0].Kid {
+				fmt.Println("whats the big deal?!")
+			} else {
+				fmt.Println("well obviously, this fails!")
+			}
+			// fmt.Printf("Here is my key: '%v'\n", keys.Keys[0].N)
+
+			data := readKeyBytes(keys.Keys[0].N)
+			// fmt.Printf("Lets see some data %q\n", data)
+		
+			bigN := new(big.Int)
+			bigN.SetBytes(data)
+			// fmt.Printf("Here is a big.Int: %v\n", bigN)
+
+			// bigN, worked := bigN.SetString(keys.Keys[0].N, 0)
+			// if !worked {
+			// 	fmt.Println("Cannot convert N to bin.Int")
+			// }
+			data = readKeyBytes(keys.Keys[0].E)
+			bigE := new(big.Int)
+			bigE.SetBytes(data)
+			// fmt.Printf("Here is a big.Int: %v\n", bigE)
+			intE := int(bigE.Int64())
+			if err != nil {
+				fmt.Println("error parsing e: ", err)
+			}
+			return &rsa.PublicKey{N: bigN, E: intE}, nil
 		})
 		if err != nil {
 			fmt.Println("There was an issue parsing the JWT: ", err)
+		} else {
+			fmt.Println("Here is an explicit success!!!!")
 		}
 		// Don't forget to validate the alg is what you expect:
 		// token, err := jwt.ParseWithClaims(tokenString, &CustomClaimsExample{}, func(token *jwt.Token) (interface{}, error) {
@@ -147,6 +178,19 @@ func FUCKITIWRITEMYOWN() gin.HandlerFunc {
 	}
 }
 
+func readKeyBytes(keyPart string) []byte {
+
+	data, err := base64.RawURLEncoding.DecodeString(keyPart)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	if len(data)%2 != 0 {
+		data = append([]byte{'\x00'}, data...)
+	}
+	return data
+}
+
 type Auth0PublicKeys struct {
 	Keys []Auth0Key
 }
@@ -156,5 +200,8 @@ type Auth0Key struct  {
 	Kty string
 	Use string
 	X5c []string
-	// some more things IDC about 
+	N string
+	E string
+	Kid string
+	X5t string
 }
