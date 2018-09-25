@@ -5,6 +5,7 @@ import (
 
 	"tacit-api/crypt"
 	"tacit-api/db"
+	tacitHttp "tacit-api/http"
 	"tacit-api/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -14,11 +15,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type webUser struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 type env struct {
 	ourDB    db.TacitDB
 	logger   logrus.FieldLogger
@@ -26,22 +22,22 @@ type env struct {
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
-	ctx := &realHttpContext{ginCtx: c}
+	ctx := tacitHttp.NewContext(c)
 	createUser(ctx, e.ourDB, e.ourCrypt, e.logger)
 }
 
 func (e *env) doLogin(c *gin.Context) {
-	ctx := &realHttpContext{ginCtx: c}
+	ctx := tacitHttp.NewContext(c)
 	login(ctx, e.ourDB, e.ourCrypt, e.logger)
 }
 
 func (e *env) doCreatePost(c *gin.Context) {
-	ctx := &realHttpContext{ginCtx: c}
+	ctx := tacitHttp.NewContext(c)
 	createPost(ctx, e.ourDB, e.logger)
 }
 
 func (e *env) doListPosts(c *gin.Context) {
-	ctx := &realHttpContext{ginCtx: c}
+	ctx := tacitHttp.NewContext(c)
 	listPosts(ctx, e.ourDB, e.logger)
 }
 
