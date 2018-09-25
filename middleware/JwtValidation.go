@@ -17,7 +17,7 @@ func JwtValidation() gin.HandlerFunc {
 	fmt.Println("installing a middleware")
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
-		_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
@@ -70,6 +70,7 @@ func JwtValidation() gin.HandlerFunc {
 			fmt.Println("There was an issue parsing the JWT: ", err)
 		} else {
 			fmt.Println("Here is an explicit success!!!!")
+			fmt.Println("What are my claims?: ", token.Claims)
 			c.Set("authed", true)
 		}
 		// Don't forget to validate the alg is what you expect:

@@ -85,7 +85,7 @@ func main() {
 	r.Use(middleware.JwtValidation())
 
 	r.GET("/ping", func(c *gin.Context) {
-		isAuthed := c.GetBool("authed") //.(bool)
+		isAuthed := c.GetBool("authed")
 		if isAuthed {
 			c.JSON(200, gin.H{"message": "pong: authed"})
 		} else {
