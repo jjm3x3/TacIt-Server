@@ -161,9 +161,7 @@ func TestListPostsReadsFromDB(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		bindJSONDoesError: true,
-	}
+	c := &httpContextMock{}
 	db := &tacitDb.TacitDBMock{}
 
 	listPosts(c, db, mockLogger)
@@ -184,9 +182,7 @@ func TestListPostsWillLogAnErrorInCaseOfDBFailure(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		bindJSONDoesError: true,
-	}
+	c := &httpContextMock{}
 	db := &tacitDb.TacitDBMock{HasError: true}
 
 	mockLogger.EXPECT().Errorln("An error has occured fetching posts: ", gomock.Any())
