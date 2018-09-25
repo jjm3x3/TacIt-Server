@@ -82,7 +82,7 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(middleware.JwtValidation())
+	r.Use(middleware.JwtValidation(aLogger))
 
 	r.GET("/ping", func(c *gin.Context) {
 		isAuthed := c.GetBool("authed")
