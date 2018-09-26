@@ -5,22 +5,22 @@ import (
 )
 
 type HttpContextMock struct {
-	bindJSONIsCalled      bool
-	jsonCode              int
-	timesJSONisCalled     int
-	bindJSONDoesError     bool
-	bindJSONResultWebUser *WebUser
+	BindJSONIsCalled      bool
+	JSONCode              int
+	TimesJSONisCalled     int
+	BindJSONDoesError     bool
+	BindJSONResultWebUser *WebUser
 }
 
 func (ctx *HttpContextMock) BindJSON(obj interface{}) error {
-	ctx.bindJSONIsCalled = true
-	if ctx.bindJSONDoesError {
+	ctx.BindJSONIsCalled = true
+	if ctx.BindJSONDoesError {
 		return fmt.Errorf("error")
 	}
 	wobj, k := obj.(*WebUser)
 	if k {
-		wobj.Username = ctx.bindJSONResultWebUser.Username
-		wobj.Password = ctx.bindJSONResultWebUser.Password
+		wobj.Username = ctx.BindJSONResultWebUser.Username
+		wobj.Password = ctx.BindJSONResultWebUser.Password
 	}
 	return nil
 
@@ -31,8 +31,8 @@ func (ctx *HttpContextMock) ReadBody([]byte) (int, error) {
 }
 
 func (ctx *HttpContextMock) JSON(code int, obj map[string]interface{}) {
-	ctx.jsonCode = code
-	ctx.timesJSONisCalled++
+	ctx.JSONCode = code
+	ctx.TimesJSONisCalled++
 }
 
 func (ctx *HttpContextMock) GetHeader(key string) string {

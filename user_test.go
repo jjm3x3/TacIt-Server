@@ -3,6 +3,7 @@ package main
 import (
 	tacitCrypt "tacit-api/crypt"
 	tacitDb "tacit-api/db"
+	tacitHttp "tacit-api/http"
 
 	"testing"
 
@@ -16,16 +17,16 @@ func TestLoginReadsBody(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
 
 	aDBUser := &tacitDb.DbUser{}
 
-	c := &httpContextMock{
-		bindJSONIsCalled:      false,
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONIsCalled:      false,
+		BindJSONResultWebUser: aWebUser,
 	}
 
 	db := &tacitDb.TacitDBMock{
@@ -40,7 +41,7 @@ func TestLoginReadsBody(t *testing.T) {
 
 	login(c, db, crypt, mockLogger)
 
-	if !c.bindJSONIsCalled {
+	if !c.BindJSONIsCalled {
 		t.Error("bindJSON is never called and should be called at least once.")
 	}
 
@@ -50,7 +51,7 @@ func TestLoginHappyPath(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
@@ -60,10 +61,10 @@ func TestLoginHappyPath(t *testing.T) {
 		Password: aWebUser.Password,
 	}
 
-	c := &httpContextMock{
-		jsonCode:              0,
-		timesJSONisCalled:     0,
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:              0,
+		TimesJSONisCalled:     0,
+		BindJSONResultWebUser: aWebUser,
 	}
 
 	db := &tacitDb.TacitDBMock{
@@ -77,11 +78,11 @@ func TestLoginHappyPath(t *testing.T) {
 
 	login(c, db, crypt, mockLogger)
 
-	if c.jsonCode != 200 {
-		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 200 {
+		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 }
 
@@ -90,17 +91,17 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Usernam",
 		Password: "Password",
 	}
 
 	aDBUser := &tacitDb.DbUser{}
 
-	c := &httpContextMock{
-		jsonCode:              0,
-		timesJSONisCalled:     0,
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:              0,
+		TimesJSONisCalled:     0,
+		BindJSONResultWebUser: aWebUser,
 	}
 
 	db := &tacitDb.TacitDBMock{
@@ -113,11 +114,12 @@ func TestLoginWrongUsernameRightPassword(t *testing.T) {
 	mockLogger.EXPECT().Errorf("Error when logging in: %v\n", gomock.Any())
 
 	login(c, db, crypt, mockLogger)
-	if c.jsonCode != 401 {
-		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.jsonCode)
+
+	if c.JSONCode != 401 {
+		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 }
 
@@ -126,7 +128,7 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Passwor",
 	}
@@ -136,10 +138,10 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 		Password: aWebUser.Password + "d",
 	}
 
-	c := &httpContextMock{
-		jsonCode:              0,
-		timesJSONisCalled:     0,
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:              0,
+		TimesJSONisCalled:     0,
+		BindJSONResultWebUser: aWebUser,
 	}
 
 	db := &tacitDb.TacitDBMock{
@@ -153,11 +155,11 @@ func TestLoginRightUsernameWrongPassword(t *testing.T) {
 
 	login(c, db, crypt, mockLogger)
 
-	if c.jsonCode != 401 {
-		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 401 {
+		t.Errorf("The expected http status code is 401 for sad path. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 }
 
@@ -166,10 +168,10 @@ func TestLoginBindError(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		jsonCode:          0,
-		timesJSONisCalled: 0,
-		bindJSONDoesError: true,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:          0,
+		TimesJSONisCalled: 0,
+		BindJSONDoesError: true,
 	}
 
 	aDBUser := &tacitDb.DbUser{}
@@ -183,11 +185,11 @@ func TestLoginBindError(t *testing.T) {
 
 	login(c, db, crypt, mockLogger)
 
-	if c.jsonCode != 400 {
-		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 400 {
+		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 
 }
@@ -196,7 +198,7 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
@@ -206,10 +208,10 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 		Password: aWebUser.Password,
 	}
 
-	c := &httpContextMock{
-		jsonCode:              0,
-		timesJSONisCalled:     0,
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:              0,
+		TimesJSONisCalled:     0,
+		BindJSONResultWebUser: aWebUser,
 	}
 
 	db := &tacitDb.TacitDBMock{
@@ -224,11 +226,11 @@ func TestLoginUserDoesNotExistError(t *testing.T) {
 
 	login(c, db, crypt, mockLogger)
 
-	if c.jsonCode != 401 {
-		t.Errorf("The expected http status code is 401 for this path. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 401 {
+		t.Errorf("The expected http status code is 401 for this path. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 }
 func TestCreateUserReadsBody(t *testing.T) {
@@ -236,14 +238,14 @@ func TestCreateUserReadsBody(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
 
-	c := &httpContextMock{
-		bindJSONIsCalled:      false,
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONIsCalled:      false,
+		BindJSONResultWebUser: aWebUser,
 	}
 
 	db := &tacitDb.TacitDBMock{}
@@ -255,7 +257,7 @@ func TestCreateUserReadsBody(t *testing.T) {
 
 	createUser(c, db, crypt, mockLogger)
 
-	if !c.bindJSONIsCalled {
+	if !c.BindJSONIsCalled {
 		t.Error("bindJSON is never called and should be called at least once.")
 	}
 
@@ -266,15 +268,15 @@ func TestCreateUserHappyPath(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
 
-	c := &httpContextMock{
-		jsonCode:              0,
-		timesJSONisCalled:     0,
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:              0,
+		TimesJSONisCalled:     0,
+		BindJSONResultWebUser: aWebUser,
 	}
 
 	db := &tacitDb.TacitDBMock{
@@ -288,11 +290,11 @@ func TestCreateUserHappyPath(t *testing.T) {
 
 	createUser(c, db, crypt, mockLogger)
 
-	if c.jsonCode != 200 {
-		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 200 {
+		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 }
 
@@ -301,10 +303,10 @@ func TestCreateUserBindError(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		jsonCode:          0,
-		timesJSONisCalled: 0,
-		bindJSONDoesError: true,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:          0,
+		TimesJSONisCalled: 0,
+		BindJSONDoesError: true,
 	}
 
 	aDBUser := &tacitDb.DbUser{}
@@ -317,11 +319,11 @@ func TestCreateUserBindError(t *testing.T) {
 	mockLogger.EXPECT().Errorf("There was an error parsing login: %v", gomock.Any())
 
 	createUser(c, db, crypt, mockLogger)
-	if c.jsonCode != 400 {
-		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 400 {
+		t.Errorf("The expected http status code is 400 for sad path. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 
 }
@@ -331,13 +333,13 @@ func TestCreateUserSavesUser(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
 	//setup
-	c := &httpContextMock{
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDb.TacitDBMock{
 		TimesCreateWasCalled: 0,
@@ -366,13 +368,13 @@ func TestCreateUserPasswordStoredProperly(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
 
-	c := &httpContextMock{
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDb.TacitDBMock{}
 	crypt := &tacitCrypt.TacitCryptMock{}
@@ -391,13 +393,13 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
 
-	c := &httpContextMock{
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDb.TacitDBMock{
 		HasError:      true,
@@ -409,11 +411,11 @@ func TestCreateUserDatabaseCreationError(t *testing.T) {
 	mockLogger.EXPECT().Errorf("There was an issue creating user: %v", gomock.Any())
 
 	createUser(c, db, crypt, mockLogger)
-	if c.jsonCode != 500 {
-		t.Errorf("The expected http status code is 500 for user database creation error. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 500 {
+		t.Errorf("The expected http status code is 500 for user database creation error. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 
 }
@@ -423,12 +425,12 @@ func TestCreateUserGeneratePasswordError(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	aWebUser := &webUser{
+	aWebUser := &tacitHttp.WebUser{
 		Username: "Username",
 		Password: "Password",
 	}
-	c := &httpContextMock{
-		bindJSONResultWebUser: aWebUser,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONResultWebUser: aWebUser,
 	}
 	db := &tacitDb.TacitDBMock{}
 	crypt := &tacitCrypt.TacitCryptMock{
@@ -440,11 +442,11 @@ func TestCreateUserGeneratePasswordError(t *testing.T) {
 
 	createUser(c, db, crypt, mockLogger)
 
-	if c.jsonCode != 500 {
-		t.Errorf("The expected http status code is 500 for user database createion error. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 500 {
+		t.Errorf("The expected http status code is 500 for user database createion error. The current status code was %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 
 }
