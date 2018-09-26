@@ -38,9 +38,9 @@ func (ctx *RealHttpContext) JSON(code int, jsonResponse map[string]interface{}) 
 }
 
 func (ctx *RealHttpContext) GetHeader(key string) string {
-	panic("NOT IMPLEMENTED")
+	return ctx.ginCtx.GetHeader(key)
 }
 
 func (ctx *RealHttpContext) Set(key string, value interface{}) {
-	panic("NOT IMPLEMENTED")
+	ctx.ginCtx.Set(key, value)
 }
