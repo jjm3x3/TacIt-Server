@@ -98,7 +98,7 @@ func main() {
 	authedGroup := r.Group("/", middleware.JwtValidation(aLogger))
 	authedGroup.GET("/health/authed", func(c *gin.Context) {
 		callContext := tacitHttp.NewContext(c)
-		if !callContext.IsAuthed() {
+		if !isAuthed(callContext) {
 			return
 		}
 

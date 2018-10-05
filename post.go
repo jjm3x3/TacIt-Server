@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 
 	tacitDB "tacit-api/db"
 	tacitHttp "tacit-api/http"
@@ -10,7 +11,7 @@ import (
 )
 
 func createPost(c tacitHttp.HttpContext, db tacitDB.TacitDB, logger logrus.FieldLogger) {
-	if !c.IsAuthed() {
+	if !isAuthed(c) {
 		return
 	}
 
@@ -33,7 +34,7 @@ func createPost(c tacitHttp.HttpContext, db tacitDB.TacitDB, logger logrus.Field
 }
 
 func listPosts(c tacitHttp.HttpContext, db tacitDB.TacitDB, logger logrus.FieldLogger) {
-	if !c.IsAuthed() {
+	if !isAuthed(c) {
 		return
 	}
 
@@ -45,4 +46,12 @@ func listPosts(c tacitHttp.HttpContext, db tacitDB.TacitDB, logger logrus.FieldL
 	}
 
 	c.JSON(200, gin.H{"posts": somePosts})
+}
+
+func isAuthed(ctx tacitHttp.HttpContext) bool {
+	if isAuthed := ctx.GetBool("authed"); !isAuthed {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"result": "unauthorized"})
+		return false
+	}
+	return true
 }

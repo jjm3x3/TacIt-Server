@@ -1,8 +1,6 @@
 package http
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,9 +16,7 @@ type HttpContext interface {
 	JSON(int, map[string]interface{})
 	GetHeader(string) string
 	Set(string, interface{})
-
-	// New Methods defined here
-	IsAuthed() bool
+	GetBool(string) bool
 }
 
 type RealHttpContext struct {
@@ -51,10 +47,6 @@ func (ctx *RealHttpContext) Set(key string, value interface{}) {
 	ctx.ginCtx.Set(key, value)
 }
 
-func (ctx *RealHttpContext) IsAuthed() bool {
-	if isAuthed := ctx.ginCtx.GetBool("authed"); !isAuthed {
-		ctx.ginCtx.JSON(http.StatusUnauthorized, gin.H{"result": "unauthorized"})
-		return false
-	}
-	return true
+func (ctx *RealHttpContext) GetBool(key string) bool {
+	return ctx.ginCtx.GetBool(key)
 }
