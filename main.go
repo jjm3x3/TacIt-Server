@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 
 	"tacit-api/crypt"
@@ -78,25 +79,35 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(middleware.JwtValidation(aLogger))
-
 	r.GET("/ping", func(c *gin.Context) {
-		isAuthed := c.GetBool("authed")
-		if isAuthed {
-			c.JSON(200, gin.H{"message": "pong: authed"})
-		} else {
-			c.JSON(200, gin.H{"message": "pong: unauthed"})
-		}
+		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
+
 	anEnv := &env{ourDB: aRealTacitDB, logger: aLogger, ourCrypt: &crypt.RealTacitCrypt{}}
+
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"result": "ok"})
+	})
 
 	r.POST("/user", anEnv.doCreateUser)
 
 	r.POST("/login", anEnv.doLogin)
 
-	r.POST("/note", anEnv.doCreatePost)
+	/// expects controllers to perform callContext.IsAuthed() check
+	/// like in the `/health/authed` route
+	authedGroup := r.Group("/", middleware.JwtValidation(aLogger))
+	authedGroup.GET("/health/authed", func(c *gin.Context) {
+		callContext := tacitHttp.NewContext(c)
+		if !callContext.IsAuthed() {
+			return
+		}
 
-	r.GET("/note", anEnv.doListPosts)
+		callContext.JSON(http.StatusOK, gin.H{"result": "authorized"})
+	})
+
+	authedGroup.POST("/note", anEnv.doCreatePost)
+
+	authedGroup.GET("/note", anEnv.doListPosts)
 
 	r.Run()
 }

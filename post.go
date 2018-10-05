@@ -1,6 +1,7 @@
 package main
 
 import (
+
 	tacitDB "tacit-api/db"
 	tacitHttp "tacit-api/http"
 
@@ -9,6 +10,10 @@ import (
 )
 
 func createPost(c tacitHttp.HttpContext, db tacitDB.TacitDB, logger logrus.FieldLogger) {
+	if !c.IsAuthed() {
+		return
+	}
+
 	var aPost tacitDB.Post
 	err := c.BindJSON(&aPost)
 	if err != nil {
@@ -28,6 +33,10 @@ func createPost(c tacitHttp.HttpContext, db tacitDB.TacitDB, logger logrus.Field
 }
 
 func listPosts(c tacitHttp.HttpContext, db tacitDB.TacitDB, logger logrus.FieldLogger) {
+	if !c.IsAuthed() {
+		return
+	}
+
 	var somePosts []tacitDB.Post
 	err := db.Table("posts").Find(&somePosts).Error()
 
