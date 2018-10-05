@@ -42,3 +42,7 @@ func (ctx *HttpContextMock) GetHeader(key string) string {
 func (ctx *HttpContextMock) Set(key string, value interface{}) {
 	panic("NOT IMPLEMENTED")
 }
+
+func (ctx *HttpContextMock) GetBool(key string) bool {
+	return true
+}
