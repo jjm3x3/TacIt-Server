@@ -6,7 +6,8 @@ import (
 
 type HttpContextMock struct {
 	// setup
-	GetBoolResult bool
+	GetBoolResult   bool
+	GetHeaderResult string
 	// results
 	BindJSONIsCalled      bool
 	JSONCode              int
@@ -39,11 +40,10 @@ func (ctx *HttpContextMock) JSON(code int, obj map[string]interface{}) {
 }
 
 func (ctx *HttpContextMock) GetHeader(key string) string {
-	panic("NOT IMPLEMENTED")
+	return ctx.GetHeaderResult
 }
 
 func (ctx *HttpContextMock) Set(key string, value interface{}) {
-	panic("NOT IMPLEMENTED")
 }
 
 func (ctx *HttpContextMock) GetBool(key string) bool {

@@ -16,6 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// untestable wrapper
 func JwtValidation(fieldLogger logrus.FieldLogger) gin.HandlerFunc {
 	fieldLogger.Info("Installing JWT Middleware")
 	return func(c *gin.Context) {
