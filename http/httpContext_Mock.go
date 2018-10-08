@@ -5,6 +5,9 @@ import (
 )
 
 type HttpContextMock struct {
+	// setup
+	GetBoolResult bool
+	// results
 	BindJSONIsCalled      bool
 	JSONCode              int
 	TimesJSONisCalled     int
@@ -44,5 +47,5 @@ func (ctx *HttpContextMock) Set(key string, value interface{}) {
 }
 
 func (ctx *HttpContextMock) GetBool(key string) bool {
-	return true
+	return ctx.GetBoolResult
 }

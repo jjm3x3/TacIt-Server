@@ -18,6 +18,7 @@ func TestCreatePostReadsBody(t *testing.T) {
 
 	c := &tacitHttp.HttpContextMock{
 		BindJSONIsCalled: false,
+		GetBoolResult:    true,
 	}
 	db := &tacitDb.TacitDBMock{}
 
@@ -41,6 +42,7 @@ func TestCreatePostHapyPath(t *testing.T) {
 	c := &tacitHttp.HttpContextMock{
 		JSONCode:          0,
 		TimesJSONisCalled: 0,
+		GetBoolResult:     true,
 	}
 	db := &tacitDb.TacitDBMock{}
 
@@ -69,6 +71,7 @@ func TestCreatePostSadPath(t *testing.T) {
 		JSONCode:          0,
 		TimesJSONisCalled: 0,
 		BindJSONDoesError: true,
+		GetBoolResult:     true,
 	}
 
 	db := &tacitDb.TacitDBMock{}
@@ -95,7 +98,9 @@ func TestCreatePostSavesPost(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &tacitHttp.HttpContextMock{}
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: true,
+	}
 	db := &tacitDb.TacitDBMock{TimesCreateWasCalled: 0}
 	expectedDbCreates := 1
 
@@ -117,6 +122,7 @@ func TestCreatePostBindJSONFailureLogsError(t *testing.T) {
 
 	c := &tacitHttp.HttpContextMock{
 		BindJSONDoesError: true,
+		GetBoolResult:     true,
 	}
 	db := &tacitDb.TacitDBMock{}
 
@@ -131,6 +137,28 @@ func TestCreatePostBindJSONFailureLogsError(t *testing.T) {
 	// taken care of through gomock
 }
 
+func TestCreatePostReturns401WhenUnauthenticated(t *testing.T) {
+
+	//setup
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: false,
+	}
+	db := &tacitDb.TacitDBMock{}
+
+	//execution
+	createPost(c, db, mockLogger)
+
+	//assertions
+	expectedCode := 401
+	if c.JSONCode != expectedCode {
+		t.Errorf("Expected API to throw a %v http status code when un authed\n", expectedCode)
+	}
+}
+
 func TestListPostsHappyPath(t *testing.T) {
 
 	// setup
@@ -140,6 +168,7 @@ func TestListPostsHappyPath(t *testing.T) {
 
 	c := &tacitHttp.HttpContextMock{
 		BindJSONDoesError: true,
+		GetBoolResult:     true,
 	}
 	db := &tacitDb.TacitDBMock{}
 
@@ -162,7 +191,9 @@ func TestListPostsReadsFromDB(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &tacitHttp.HttpContextMock{}
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: true,
+	}
 	db := &tacitDb.TacitDBMock{}
 
 	listPosts(c, db, mockLogger)
@@ -183,7 +214,9 @@ func TestListPostsWillLogAnErrorInCaseOfDBFailure(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &tacitHttp.HttpContextMock{}
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: true,
+	}
 	db := &tacitDb.TacitDBMock{HasError: true}
 
 	mockLogger.EXPECT().Errorln("An error has occured fetching posts: ", gomock.Any())
@@ -192,5 +225,26 @@ func TestListPostsWillLogAnErrorInCaseOfDBFailure(t *testing.T) {
 
 	//assertions
 	// taken care of through gomock
+}
 
+func TestListPostsReturns401WhenUnauthenticated(t *testing.T) {
+
+	//setup
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: false,
+	}
+	db := &tacitDb.TacitDBMock{}
+
+	//execution
+	listPosts(c, db, mockLogger)
+
+	//assertions
+	expectedCode := 401
+	if c.JSONCode != expectedCode {
+		t.Errorf("Expected API to throw a %v http status code when un authed\n", expectedCode)
+	}
 }
