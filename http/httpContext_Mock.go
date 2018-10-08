@@ -14,6 +14,7 @@ type HttpContextMock struct {
 	TimesJSONisCalled     int
 	BindJSONDoesError     bool
 	BindJSONResultWebUser *WebUser
+	SetIsCalled           bool
 }
 
 func (ctx *HttpContextMock) BindJSON(obj interface{}) error {
@@ -44,6 +45,7 @@ func (ctx *HttpContextMock) GetHeader(key string) string {
 }
 
 func (ctx *HttpContextMock) Set(key string, value interface{}) {
+	ctx.SetIsCalled = true
 }
 
 func (ctx *HttpContextMock) GetBool(key string) bool {

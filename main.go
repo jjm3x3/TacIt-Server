@@ -8,6 +8,7 @@ import (
 	"tacit-api/db"
 	tacitHttp "tacit-api/http"
 	"tacit-api/middleware"
+	pki "tacit-api/pki"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -17,9 +18,10 @@ import (
 )
 
 type env struct {
-	ourDB    db.TacitDB
-	logger   logrus.FieldLogger
-	ourCrypt crypt.TacitCrypt
+	ourDB             db.TacitDB
+	logger            logrus.FieldLogger
+	ourCrypt          crypt.TacitCrypt
+	publicKeyProvider pki.PublicKeyProvider
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
@@ -40,6 +42,11 @@ func (e *env) doCreatePost(c *gin.Context) {
 func (e *env) doListPosts(c *gin.Context) {
 	ctx := tacitHttp.NewContext(c)
 	listPosts(ctx, e.ourDB, e.logger)
+}
+
+func (e *env) doJwtValidation(c *gin.Context) {
+	ctx := tacitHttp.NewContext(c)
+	middleware.JwtValidation(ctx, e.logger, e.publicKeyProvider)
 }
 
 func main() {
@@ -83,7 +90,12 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 
-	anEnv := &env{ourDB: aRealTacitDB, logger: aLogger, ourCrypt: &crypt.RealTacitCrypt{}}
+	anEnv := &env{
+		ourDB:             aRealTacitDB,
+		logger:            aLogger,
+		ourCrypt:          &crypt.RealTacitCrypt{},
+		publicKeyProvider: &pki.RealPublicKeyProvider{},
+	}
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"result": "ok"})
@@ -95,7 +107,7 @@ func main() {
 
 	/// expects controllers to perform callContext.IsAuthed() check
 	/// like in the `/health/authed` route
-	authedGroup := r.Group("/", middleware.JwtValidation(aLogger))
+	authedGroup := r.Group("/", anEnv.doJwtValidation)
 	authedGroup.GET("/health/authed", func(c *gin.Context) {
 		callContext := tacitHttp.NewContext(c)
 		if !isAuthed(callContext) {
