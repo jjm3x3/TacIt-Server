@@ -34,11 +34,29 @@ func TestPublicKeyProviderHappyPath(t *testing.T) {
 	if key == nil {
 		t.Error("We should get a non nil key in this test")
 	}
-
-	fmt.Println("here is the final key result: ", key)
-	t.Fail()
 }
 
+func TestPublicKeyProviderFailsWhenTheServerStoringPublicKeysFails(t *testing.T) {
+	expectedId := "someId"
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		panic("Server had a terrible failure")
+	}))
+
+	defer server.Close()
+
+	pkp := NewPublicKeyProvider(server.Client(), server.URL)
+
+	key, err := pkp.GetPublicKey(expectedId)
+
+	fmt.Println("what is the error in this case: ", err)
+	if err == nil {
+		t.Error("An error is expected when the server storing public keys fails: ", err)
+	}
+
+	if key != nil {
+		t.Error("We should get a nil key in this test")
+	}
+}
 func TestPublicKeyProviderShouldReturnAnErrorIfItDoesntGetAnExpectedAuth0PublicKeyType(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.Write([]byte("ok"))

@@ -32,6 +32,7 @@ func (this *RealPublicKeyProvider) GetPublicKey(keyId string) (*rsa.PublicKey, e
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		// TODO:: not sure how to test this or if I need to
 		return nil, fmt.Errorf("Error reading auth0keys response: %v", err)
 	}
 
