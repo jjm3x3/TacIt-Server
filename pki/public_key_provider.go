@@ -15,10 +15,16 @@ type PublicKeyProvider interface {
 }
 
 type RealPublicKeyProvider struct {
+	url    string
+	client *http.Client
+}
+
+func NewPublicKeyProvider(client *http.Client, url string) PublicKeyProvider {
+	return &RealPublicKeyProvider{client: client, url: url}
 }
 
 func (this *RealPublicKeyProvider) GetPublicKey(keyId string) (*rsa.PublicKey, error) {
-	resp, err := http.Get("https://tacit.auth0.com/.well-known/jwks.json")
+	resp, err := this.client.Get(this.url)
 	if err != nil {
 		return nil, fmt.Errorf("Our public key is unavailable becase: %v\n", err)
 	}

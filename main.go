@@ -94,7 +94,7 @@ func main() {
 		ourDB:             aRealTacitDB,
 		logger:            aLogger,
 		ourCrypt:          &crypt.RealTacitCrypt{},
-		publicKeyProvider: &pki.RealPublicKeyProvider{},
+		publicKeyProvider: pki.NewPublicKeyProvider(&http.Client{}, "https://tacit.auth0.com/.well-known/jwks.json"),
 	}
 
 	r.GET("/health", func(c *gin.Context) {
