@@ -9,6 +9,7 @@ import (
 )
 
 func TestPublicKeyProviderHappyPath(t *testing.T) {
+	// setup
 	expectedId := "someId"
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		keys := Auth0PublicKeys{}
@@ -25,8 +26,10 @@ func TestPublicKeyProviderHappyPath(t *testing.T) {
 
 	pkp := NewPublicKeyProvider(server.Client(), server.URL)
 
+	// execution
 	key, err := pkp.GetPublicKey(expectedId)
 
+	// assertions
 	if err != nil {
 		t.Error("An error occured while trying to get the public key: ", err)
 	}
@@ -37,6 +40,7 @@ func TestPublicKeyProviderHappyPath(t *testing.T) {
 }
 
 func TestPublicKeyProviderFailsWhenTheServerStoringPublicKeysFails(t *testing.T) {
+	// setup
 	expectedId := "someId"
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		panic("Server had a terrible failure")
@@ -46,9 +50,10 @@ func TestPublicKeyProviderFailsWhenTheServerStoringPublicKeysFails(t *testing.T)
 
 	pkp := NewPublicKeyProvider(server.Client(), server.URL)
 
+	// execution
 	key, err := pkp.GetPublicKey(expectedId)
 
-	fmt.Println("what is the error in this case: ", err)
+	// assertions
 	if err == nil {
 		t.Error("An error is expected when the server storing public keys fails: ", err)
 	}
@@ -58,6 +63,7 @@ func TestPublicKeyProviderFailsWhenTheServerStoringPublicKeysFails(t *testing.T)
 	}
 }
 func TestPublicKeyProviderShouldReturnAnErrorIfItDoesntGetAnExpectedAuth0PublicKeyType(t *testing.T) {
+	// setup
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.Write([]byte("ok"))
 	}))
@@ -66,8 +72,10 @@ func TestPublicKeyProviderShouldReturnAnErrorIfItDoesntGetAnExpectedAuth0PublicK
 
 	pkp := NewPublicKeyProvider(server.Client(), server.URL)
 
+	// execution
 	key, err := pkp.GetPublicKey("someID")
 
+	// assertions
 	if err == nil {
 		t.Error("An error is expected when an unknown id is passed into the get key method: ", err)
 	}
@@ -78,6 +86,7 @@ func TestPublicKeyProviderShouldReturnAnErrorIfItDoesntGetAnExpectedAuth0PublicK
 }
 
 func TestPublicKeyProviderShouldReturnAnErrorIfItDoesntFindAKeyWithTheProvidedId(t *testing.T) {
+	// setup
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		keys := Auth0PublicKeys{}
 		keys.Keys = append(keys.Keys, Auth0Key{})
@@ -93,8 +102,10 @@ func TestPublicKeyProviderShouldReturnAnErrorIfItDoesntFindAKeyWithTheProvidedId
 
 	pkp := NewPublicKeyProvider(server.Client(), server.URL)
 
+	// execution
 	key, err := pkp.GetPublicKey("someID")
 
+	// assertions
 	if err == nil {
 		t.Error("An error is expected when an unknown id is passed into the get key method: ", err)
 	}
