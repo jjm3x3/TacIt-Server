@@ -53,8 +53,7 @@ func (this *RealPublicKeyProvider) GetPublicKey(keyId string) (*rsa.PublicKey, e
 		return nil, fmt.Errorf("There was no matching key for kid: %v", keyId)
 	}
 
-	// TODO:: GET correct key
-	data, err := readKeyBytes(keys.Keys[0].N)
+	data, err := readKeyBytes(validaingKey.N)
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +61,7 @@ func (this *RealPublicKeyProvider) GetPublicKey(keyId string) (*rsa.PublicKey, e
 	bigN := new(big.Int)
 	bigN.SetBytes(data)
 
-	// TODO:: GET correct key
-	data, err = readKeyBytes(keys.Keys[0].E)
+	data, err = readKeyBytes(validaingKey.E)
 	if err != nil {
 		return nil, err
 	}

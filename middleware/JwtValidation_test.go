@@ -66,18 +66,6 @@ func TestDoJwtValidationFailsWithoutAKID(t *testing.T) {
 	}
 }
 
-func genRsaPair() *rsa.PrivateKey {
-
-	reader := rand.Reader
-	bitSize := 512
-
-	key, err := rsa.GenerateKey(reader, bitSize)
-	if err != nil {
-		fmt.Println("Can't generate rsa key pair?")
-	}
-	return key
-}
-
 func getHeaderAndBody(aud, iss string) string {
 
 	jwtHeaderJsonString := `{"alg":"RS256","typ":"JWT","kid":"M0E1MzQzMjM4RDEwNzI4RDE0NzE5QTE3RTlDNkU1NTc0QThGREE3MA"}`
@@ -99,7 +87,7 @@ func getHeaderAndBody(aud, iss string) string {
 
 func genJwt(key *rsa.PrivateKey, aud, iss string) string {
 	if key == nil {
-		key = genRsaPair()
+		key = pki.GenRsaPair()
 	}
 
 	headerAndBody := getHeaderAndBody(aud, iss)
@@ -116,7 +104,7 @@ func genJwt(key *rsa.PrivateKey, aud, iss string) string {
 func TestDoJwtValidationHappyPath(t *testing.T) {
 
 	//setup
-	key := genRsaPair()
+	key := pki.GenRsaPair()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
@@ -143,7 +131,7 @@ func TestDoJwtValidationHappyPath(t *testing.T) {
 func TestDoJwtValidationFailsWhenAudienceIsWrong(t *testing.T) {
 
 	//setup
-	key := genRsaPair()
+	key := pki.GenRsaPair()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
@@ -170,7 +158,7 @@ func TestDoJwtValidationFailsWhenAudienceIsWrong(t *testing.T) {
 func TestDoJwtValidationFailsWhenIssuerIsWrong(t *testing.T) {
 
 	//setup
-	key := genRsaPair()
+	key := pki.GenRsaPair()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
