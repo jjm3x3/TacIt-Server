@@ -15,7 +15,7 @@ var expectedIssuer = "someotherperson"
 
 func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLogger, publickcKeyProvider pki.PublicKeyProvider) {
 	tokenString := callContext.GetHeader("Authorization")
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(tokenString, &Auth0Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
@@ -26,6 +26,21 @@ func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLo
 		}
 		tokenKid := kidString.(string)
 		fieldLogger.Debugf("KID of token %v", tokenKid)
+
+		if claims, ok := token.Claims.(*Auth0Claims); ok {
+			err := claims.StandardClaims.Valid()
+			if err != nil {
+				return nil, err
+			}
+			if ok := claims.StandardClaims.VerifyAudience(expectedAudience, true); !ok {
+				return nil, fmt.Errorf("Audience for token is unexpected")
+			}
+			if ok := claims.StandardClaims.VerifyIssuer(expectedIssuer, true); !ok {
+				return nil, fmt.Errorf("Issue for token is unexpected")
+			}
+
+			fmt.Println("Here are some claims: ", claims.Scope)
+		 }
 
 		return publickcKeyProvider.GetPublicKey(tokenKid)
 	})
@@ -40,4 +55,9 @@ func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLo
 	// fieldLogger.Info("What are my claims?: ", token.Claims)
 
 	// callContext.Next()
+}
+
+type Auth0Claims struct {
+	Scope string `json:scope`
+	jwt.StandardClaims
 }

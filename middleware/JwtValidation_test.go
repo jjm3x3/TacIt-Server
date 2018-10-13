@@ -138,9 +138,58 @@ func TestDoJwtValidationHappyPath(t *testing.T) {
 		t.Error("Set should have been called since we expect this JWT to be valid")
 	}
 
+}
+
+func TestDoJwtValidationFailsWhenAudienceIsWrong(t *testing.T) {
+
+	//setup
+	key := genRsaPair()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
+	c := &http.HttpContextMock{
+		GetHeaderResult: genJwt(key, "unexpected Audience", expectedIssuer),
+	}
+
+	pkp := &pki.PublicKeyProviderMock{Keys: make(map[string]*rsa.PublicKey)}
+	pkp.Keys["M0E1MzQzMjM4RDEwNzI4RDE0NzE5QTE3RTlDNkU1NTc0QThGREE3MA"] = &key.PublicKey
+
 	mockLogger.EXPECT().Debugf("KID of token %v", gomock.Any())
+	mockLogger.EXPECT().Info("There was an issue validating the JWT: ", gomock.Any())
 
 	// execution
 	JwtValidation(c, mockLogger, pkp)
 
+	//assertions
+	if c.SetIsCalled {
+		t.Errorf("Set should not be called since the JWT cannot be validated")
+	}
+}
+
+func TestDoJwtValidationFailsWhenIssuerIsWrong(t *testing.T) {
+
+	//setup
+	key := genRsaPair()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
+	c := &http.HttpContextMock{
+		GetHeaderResult: genJwt(key, expectedAudience, "unexpected issuer"),
+	}
+
+	pkp := &pki.PublicKeyProviderMock{Keys: make(map[string]*rsa.PublicKey)}
+	pkp.Keys["M0E1MzQzMjM4RDEwNzI4RDE0NzE5QTE3RTlDNkU1NTc0QThGREE3MA"] = &key.PublicKey
+
+	mockLogger.EXPECT().Debugf("KID of token %v", gomock.Any())
+	mockLogger.EXPECT().Info("There was an issue validating the JWT: ", gomock.Any())
+
+	// execution
+	JwtValidation(c, mockLogger, pkp)
+
+	//assertions
+	if c.SetIsCalled {
+		t.Errorf("Set should not be called since the JWT cannot be validated")
+	}
 }
