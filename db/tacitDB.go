@@ -23,15 +23,13 @@ type TacitDB interface {
 	Where(query interface{}, args ...interface{}) TacitDB
 	Error() error
 	RecordNotFound() bool
+	Find(interface{}) TacitDB
+	Table(string) TacitDB
 }
-
-
 
 type RealTacitDB struct {
 	GormDB *gorm.DB
 }
-
-
 
 func (db *RealTacitDB) AutoMigrate(values ...interface{}) {
 	db.GormDB.AutoMigrate(values)
@@ -55,6 +53,16 @@ func (db *RealTacitDB) Error() error {
 	return db.GormDB.Error
 }
 
+func (db *RealTacitDB) Find(out interface{}) TacitDB {
+	db.GormDB = db.GormDB.Find(out)
+	return db
+}
+
+func (db *RealTacitDB) Table(name string) TacitDB {
+	db.GormDB = db.GormDB.Table(name)
+	return db
+}
+
 //Uses gorm RecordNotFound
 func (db *RealTacitDB) RecordNotFound() bool {
 	notFound := db.GormDB.RecordNotFound()
@@ -66,4 +74,3 @@ func RunMigration(db TacitDB) {
 	db.AutoMigrate(&Post{})
 	db.AutoMigrate(&DbUser{})
 }
-

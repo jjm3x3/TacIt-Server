@@ -12,6 +12,8 @@ type TacitDBMock struct {
 	TimesCreateWasCalled      int
 	TimesWhereWasCalled       int
 	TimesFirstWasCalled       int
+	TimesFindWasCalled        int
+	TableSearched             string
 	StoredPassword            string
 
 	//Behavioral Setup
@@ -19,7 +21,6 @@ type TacitDBMock struct {
 	HasError          bool
 	NoRecordFound     bool
 }
-
 
 func (db *TacitDBMock) AutoMigrate(values ...interface{}) {
 	db.TimesAutoMigrateWasCalled++
@@ -58,6 +59,16 @@ func (db *TacitDBMock) Error() error {
 		return fmt.Errorf("___GENERIC_DATABASE_ERROR___")
 	}
 	return nil
+}
+
+func (db *TacitDBMock) Find(out interface{}) TacitDB {
+	db.TimesFindWasCalled++
+	return db
+}
+
+func (db *TacitDBMock) Table(name string) TacitDB {
+	db.TableSearched = name
+	return db
 }
 
 //Mocks gorm NoRecordFound
