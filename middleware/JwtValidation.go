@@ -10,6 +10,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var expectedAudience = "someperson"
+var expectedIssuer = "someotherperson"
+
 func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLogger, publickcKeyProvider pki.PublicKeyProvider) {
 	tokenString := callContext.GetHeader("Authorization")
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -31,10 +34,10 @@ func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLo
 		return
 	}
 
-	fieldLogger.Info("Here is an explicit success!!!!")
+	fieldLogger.Debug("JWT has been validated")
 	callContext.Set("authed", true)
 
-	fieldLogger.Info("What are my claims?: ", token.Claims)
+	// fieldLogger.Info("What are my claims?: ", token.Claims)
 
 	// callContext.Next()
 }
