@@ -1,11 +1,14 @@
 package main
 
 import (
-	// "fmt"
+	"net/http"
 	"os"
 
 	"tacit-api/crypt"
 	"tacit-api/db"
+	tacitHttp "tacit-api/http"
+	"tacit-api/middleware"
+	pki "tacit-api/pki"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -14,35 +17,36 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type webUser struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
 type env struct {
-	ourDB    db.TacitDB
-	logger   logrus.FieldLogger
-	ourCrypt crypt.TacitCrypt
+	ourDB             db.TacitDB
+	logger            logrus.FieldLogger
+	ourCrypt          crypt.TacitCrypt
+	publicKeyProvider pki.PublicKeyProvider
 }
 
 func (e *env) doCreateUser(c *gin.Context) {
-	ctx := &realHttpContext{ginCtx: c}
+	ctx := tacitHttp.NewContext(c)
 	createUser(ctx, e.ourDB, e.ourCrypt, e.logger)
 }
 
 func (e *env) doLogin(c *gin.Context) {
-	ctx := &realHttpContext{ginCtx: c}
+	ctx := tacitHttp.NewContext(c)
 	login(ctx, e.ourDB, e.ourCrypt, e.logger)
 }
 
 func (e *env) doCreatePost(c *gin.Context) {
-	ctx := &realHttpContext{ginCtx: c}
+	ctx := tacitHttp.NewContext(c)
 	createPost(ctx, e.ourDB, e.logger)
 }
 
 func (e *env) doListPosts(c *gin.Context) {
-	ctx := &realHttpContext{ginCtx: c}
+	ctx := tacitHttp.NewContext(c)
 	listPosts(ctx, e.ourDB, e.logger)
+}
+
+func (e *env) doJwtValidation(c *gin.Context) {
+	ctx := tacitHttp.NewContext(c)
+	middleware.JwtValidation(ctx, e.logger, e.publicKeyProvider)
 }
 
 func main() {
@@ -64,7 +68,7 @@ func main() {
 		dbPort = "3306"
 	}
 
-	connectionString := dbUser + ":" + dbPassword + "@tcp(127.0.0.1:" + dbPort +")/" + defaultDb + "?charset=utf8&parseTime=True&loc=Local"
+	connectionString := dbUser + ":" + dbPassword + "@tcp(127.0.0.1:" + dbPort + ")/" + defaultDb + "?charset=utf8&parseTime=True&loc=Local"
 	// connectionString := "host="+defaultHost+" port="+defaultPort+" user="+defaultUser+" dbname="+defaultDb+" sslmode=disable"
 	dbHandle, err := gorm.Open("mysql", connectionString) // TODO:: enable ssl
 	defer dbHandle.Close()
@@ -78,21 +82,44 @@ func main() {
 		GormDB: dbHandle,
 	}
 
-	db.RunMigration(aRealTacitDB)
+	// db.RunMigration(aRealTacitDB)
 
 	r := gin.Default()
+
 	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "pong"})
+		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
-	anEnv := &env{ourDB: aRealTacitDB, logger: aLogger, ourCrypt: &crypt.RealTacitCrypt{}}
+
+	anEnv := &env{
+		ourDB:             aRealTacitDB,
+		logger:            aLogger,
+		ourCrypt:          &crypt.RealTacitCrypt{},
+		publicKeyProvider: pki.NewPublicKeyProvider(&http.Client{}, "https://tacit.auth0.com/.well-known/jwks.json"),
+	}
+
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"result": "ok"})
+	})
 
 	r.POST("/user", anEnv.doCreateUser)
 
 	r.POST("/login", anEnv.doLogin)
 
-	r.POST("/note", anEnv.doCreatePost)
+	/// expects controllers to perform callContext.IsAuthed() check
+	/// like in the `/health/authed` route
+	authedGroup := r.Group("/", anEnv.doJwtValidation)
+	authedGroup.GET("/health/authed", func(c *gin.Context) {
+		callContext := tacitHttp.NewContext(c)
+		if !isAuthed(callContext) {
+			return
+		}
 
-	r.GET("/note", anEnv.doListPosts)
+		callContext.JSON(http.StatusOK, gin.H{"result": "authorized"})
+	})
+
+	authedGroup.POST("/note", anEnv.doCreatePost)
+
+	authedGroup.GET("/note", anEnv.doListPosts)
 
 	r.Run()
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	tacitDb "tacit-api/db"
+	tacitHttp "tacit-api/http"
 	"tacit-api/mocks"
 	"testing"
 
@@ -15,8 +16,9 @@ func TestCreatePostReadsBody(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		bindJSONIsCalled: false,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONIsCalled: false,
+		GetBoolResult:    true,
 	}
 	db := &tacitDb.TacitDBMock{}
 
@@ -24,7 +26,7 @@ func TestCreatePostReadsBody(t *testing.T) {
 	createPost(c, db, mockLogger)
 
 	//assertions
-	if !c.bindJSONIsCalled {
+	if !c.BindJSONIsCalled {
 		t.Error("bindJSON is never called and should be called at least once")
 	}
 
@@ -37,9 +39,10 @@ func TestCreatePostHapyPath(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		jsonCode:          0,
-		timesJSONisCalled: 0,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:          0,
+		TimesJSONisCalled: 0,
+		GetBoolResult:     true,
 	}
 	db := &tacitDb.TacitDBMock{}
 
@@ -47,12 +50,12 @@ func TestCreatePostHapyPath(t *testing.T) {
 	createPost(c, db, mockLogger)
 
 	//assertions
-	if c.jsonCode != 200 {
-		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 200 {
+		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.JSONCode)
 	}
 
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v Times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v Times", c.TimesJSONisCalled)
 	}
 
 }
@@ -64,10 +67,11 @@ func TestCreatePostSadPath(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		jsonCode:          0,
-		timesJSONisCalled: 0,
-		bindJSONDoesError: true,
+	c := &tacitHttp.HttpContextMock{
+		JSONCode:          0,
+		TimesJSONisCalled: 0,
+		BindJSONDoesError: true,
+		GetBoolResult:     true,
 	}
 
 	db := &tacitDb.TacitDBMock{}
@@ -79,11 +83,11 @@ func TestCreatePostSadPath(t *testing.T) {
 	createPost(c, db, mockLogger)
 
 	//assertions
-	if c.jsonCode != 400 {
-		t.Errorf("The expected http status code is 400 for sad path. The current status code is %v", c.jsonCode)
+	if c.JSONCode != 400 {
+		t.Errorf("The expected http status code is 400 for sad path. The current status code is %v", c.JSONCode)
 	}
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on teh context exactly once but instead was called %v times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on teh context exactly once but instead was called %v times", c.TimesJSONisCalled)
 	}
 
 }
@@ -94,7 +98,9 @@ func TestCreatePostSavesPost(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{}
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: true,
+	}
 	db := &tacitDb.TacitDBMock{TimesCreateWasCalled: 0}
 	expectedDbCreates := 1
 
@@ -114,8 +120,9 @@ func TestCreatePostBindJSONFailureLogsError(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		bindJSONDoesError: true,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONDoesError: true,
+		GetBoolResult:     true,
 	}
 	db := &tacitDb.TacitDBMock{}
 
@@ -130,6 +137,28 @@ func TestCreatePostBindJSONFailureLogsError(t *testing.T) {
 	// taken care of through gomock
 }
 
+func TestCreatePostReturns401WhenUnauthenticated(t *testing.T) {
+
+	//setup
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: false,
+	}
+	db := &tacitDb.TacitDBMock{}
+
+	//execution
+	createPost(c, db, mockLogger)
+
+	//assertions
+	expectedCode := 401
+	if c.JSONCode != expectedCode {
+		t.Errorf("Expected API to throw a %v http status code when un authed\n", expectedCode)
+	}
+}
+
 func TestListPostsHappyPath(t *testing.T) {
 
 	// setup
@@ -137,20 +166,21 @@ func TestListPostsHappyPath(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{
-		bindJSONDoesError: true,
+	c := &tacitHttp.HttpContextMock{
+		BindJSONDoesError: true,
+		GetBoolResult:     true,
 	}
 	db := &tacitDb.TacitDBMock{}
 
 	listPosts(c, db, mockLogger)
 
 	//assertions
-	if c.jsonCode != 200 {
-		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.jsonCode)
+	if c.JSONCode != 200 {
+		t.Errorf("The expected http status code is 200 for happy path. The current status code was %v", c.JSONCode)
 	}
 
-	if c.timesJSONisCalled != 1 {
-		t.Errorf("json should be called on the context exactly once but instead was called %v Times", c.timesJSONisCalled)
+	if c.TimesJSONisCalled != 1 {
+		t.Errorf("json should be called on the context exactly once but instead was called %v Times", c.TimesJSONisCalled)
 	}
 }
 
@@ -161,7 +191,9 @@ func TestListPostsReadsFromDB(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{}
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: true,
+	}
 	db := &tacitDb.TacitDBMock{}
 
 	listPosts(c, db, mockLogger)
@@ -182,7 +214,9 @@ func TestListPostsWillLogAnErrorInCaseOfDBFailure(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
 
-	c := &httpContextMock{}
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: true,
+	}
 	db := &tacitDb.TacitDBMock{HasError: true}
 
 	mockLogger.EXPECT().Errorln("An error has occured fetching posts: ", gomock.Any())
@@ -191,5 +225,26 @@ func TestListPostsWillLogAnErrorInCaseOfDBFailure(t *testing.T) {
 
 	//assertions
 	// taken care of through gomock
+}
 
+func TestListPostsReturns401WhenUnauthenticated(t *testing.T) {
+
+	//setup
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLogger := mocks.NewMockFieldLogger(mockCtrl)
+
+	c := &tacitHttp.HttpContextMock{
+		GetBoolResult: false,
+	}
+	db := &tacitDb.TacitDBMock{}
+
+	//execution
+	listPosts(c, db, mockLogger)
+
+	//assertions
+	expectedCode := 401
+	if c.JSONCode != expectedCode {
+		t.Errorf("Expected API to throw a %v http status code when un authed\n", expectedCode)
+	}
 }
