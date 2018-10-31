@@ -15,6 +15,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sirupsen/logrus"
+	"github.com/gin-contrib/cors"
 )
 
 type env struct {
@@ -85,6 +86,7 @@ func main() {
 	// db.RunMigration(aRealTacitDB)
 
 	r := gin.Default()
+	r.Use(cors.Default())
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
