@@ -87,7 +87,7 @@ func main() {
 
 	r := gin.Default()
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowHeaders = []string{"Authorization"}
+	corsConfig.AllowHeaders = []string{"Origin","Authorization"}
 	r.Use(cors.New(corsConfig))
 
 	r.GET("/ping", func(c *gin.Context) {
