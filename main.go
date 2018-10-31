@@ -10,12 +10,12 @@ import (
 	"tacit-api/middleware"
 	pki "tacit-api/pki"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/sirupsen/logrus"
-	"github.com/gin-contrib/cors"
 )
 
 type env struct {
@@ -86,7 +86,9 @@ func main() {
 	// db.RunMigration(aRealTacitDB)
 
 	r := gin.Default()
-	r.Use(cors.Default())
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowHeaders = []string{"Authorization"}
+	r.Use(cors.New(corsConfig))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
