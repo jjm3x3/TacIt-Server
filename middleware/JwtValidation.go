@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var expectedAudience = "someperson"
+var expectedAudience = "http://tacit-dev.tacitapp.io"
 var expectedIssuer = "someotherperson"
 
 func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLogger, publickcKeyProvider pki.PublicKeyProvider) {
@@ -32,15 +32,15 @@ func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLo
 			if err != nil {
 				return nil, err
 			}
-			if ok := claims.StandardClaims.VerifyAudience(expectedAudience, true); !ok {
+			if ok := claims.VerifyAudience(expectedAudience); !ok {
 				return nil, fmt.Errorf("Audience for token is unexpected")
 			}
 			if ok := claims.StandardClaims.VerifyIssuer(expectedIssuer, true); !ok {
-				return nil, fmt.Errorf("Issue for token is unexpected")
+				return nil, fmt.Errorf("Issuer for token is unexpected")
 			}
 
 			fmt.Println("Here are some claims: ", claims.Scope)
-		 }
+		}
 
 		return publickcKeyProvider.GetPublicKey(tokenKid)
 	})
@@ -58,6 +58,17 @@ func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLo
 }
 
 type Auth0Claims struct {
-	Scope string `json:scope`
+	Scope    string   `json:scope`
+	Audience []string `json:"aud,omitempty"`
 	jwt.StandardClaims
+}
+
+// need to recreate since we need "override" StandardClaims.Audience
+func (c *Auth0Claims) VerifyAudience(cmp string) bool {
+	for _, aud := range c.Audience {
+		if verifyAud(aud, cmp, true) {
+			return true
+		}
+	}
+	return false
 }
