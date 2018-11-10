@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"tacit-api/crypt"
 	"tacit-api/db"
@@ -126,6 +127,29 @@ func main() {
 	authedGroup.POST("/note", anEnv.doCreatePost)
 
 	authedGroup.GET("/note", anEnv.doListPosts)
+
+	// Try touching file
+	file, err := os.OpenFile("test.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		aLogger.Error("There was an issue opening a test file: ", err)
+	}
+	defer file.Close()
+	var allTimes []byte
+	times := make([]byte, 100)
+	bytesRead, err := file.Read(times)
+	allTimes = append(allTimes, times...)
+	for bytesRead == 100 {
+		bytesRead, err = file.Read(times)
+		if err != nil {
+			aLogger.Error("There was an issue reading from the file: ", err)
+		}
+		allTimes = append(allTimes, times...)
+	}
+	aLogger.Info("Here is what I found in the file: \n", string(allTimes))
+	_, err = file.WriteString(time.Now().String() + "\n")
+	if err != nil {
+		aLogger.Error("There was an issue writing time to file: ", err)
+	}
 
 	r.Run()
 }

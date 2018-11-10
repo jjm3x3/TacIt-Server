@@ -29,6 +29,9 @@ spec:
                 key: password
         ports:
         - containerPort: 8080
+        volumeMounts:
+          - name: api-tls-cert
+            mountPath: /var/www/.cache
       - name: cloudsql-proxy
         image: gcr.io/cloudsql-docker/gce-proxy:1.11
         command: ['/cloud_sql_proxy', 
@@ -42,3 +45,4 @@ spec:
         - name: cloudsql-instance-credentials
           secret: 
             secretName: cloudsql-instance-credentials
+        - name: api-tls-cert
