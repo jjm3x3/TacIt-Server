@@ -87,7 +87,7 @@ func main() {
 
 	r := gin.Default()
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:3000", "http://frontend.tacitapp.io"}
+	corsConfig.AllowOrigins = []string{"http://localhost:3000", "http://dev.tacitapp.io"}
 	corsConfig.AllowHeaders = []string{"Origin", "Authorization"}
 	corsConfig.AllowCredentials = true
 	r.Use(cors.New(corsConfig))

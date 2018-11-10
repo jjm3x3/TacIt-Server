@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var expectedAudience = "http://tacit-dev.tacitapp.io"
+var expectedAudience = "http://api.dev.tacitapp.io"
 var expectedIssuer = "https://tacit.auth0.com/"
 
 func JwtValidation(callContext tacitHttp.HttpContext, fieldLogger logrus.FieldLogger, publickcKeyProvider pki.PublicKeyProvider) {
